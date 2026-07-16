@@ -14,19 +14,24 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setSaving(true);
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSaving(false);
+        setError(data.error || "Could not log in");
+        return;
+      }
+      router.push("/");
+      router.refresh();
+    } catch {
       setSaving(false);
-      setError(data.error || "Could not log in");
-      return;
+      setError("Could not reach the server. Check your internet connection and try again.");
     }
-    router.push("/");
-    router.refresh();
   }
 
   return (
