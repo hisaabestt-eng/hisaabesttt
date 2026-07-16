@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -9,7 +8,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,8 +25,12 @@ export default function LoginPage() {
         setError(data.error || "Could not log in");
         return;
       }
-      router.push("/");
-      router.refresh();
+      // A full page load (not router.push) so the newly-set cookie is
+      // guaranteed to be present on the very first request to "/" — a
+      // client-side transition could race ahead of the browser committing
+      // the cookie, landing back on the login redirect until a manual
+      // refresh.
+      window.location.href = "/";
     } catch {
       setSaving(false);
       setError("Could not reach the server. Check your internet connection and try again.");
