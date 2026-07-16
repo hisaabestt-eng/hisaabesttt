@@ -32,6 +32,14 @@ const ADMIN_ONLY_PREFIXES = [
 function classifyAction(pathname, method) {
   if (pathname === "/api/bulk-chain") return method === "GET" ? null : "add";
 
+  // These two don't follow the "-admin" naming convention (they predate it),
+  // but they mutate data the same way and are reachable by the "user" role,
+  // so they need the same permission gate as everything else.
+  if (pathname === "/api/clients") return method === "GET" ? null : "add";
+  if (pathname.startsWith("/api/estimates/") && pathname.endsWith("/tags")) {
+    return method === "GET" ? null : "edit";
+  }
+
   for (const prefix of ENTITY_PREFIXES) {
     if (pathname !== prefix && !pathname.startsWith(`${prefix}/`)) continue;
     if (method === "GET") return null;
