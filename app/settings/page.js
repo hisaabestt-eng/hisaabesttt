@@ -6,7 +6,7 @@ import { listUsers } from "@/lib/users";
 import { getServerSession } from "@/lib/session";
 import { CompanySelect, SearchBox } from "@/components/MainFilterBar";
 import { AddCompanyButton, EditCompanyButton, CompanyStatusButton } from "@/components/CompanyModal";
-import { AddClientButton, ClientStatusButton } from "@/components/ClientSettingsModal";
+import { AddClientButton, EditClientButton, ClientStatusButton } from "@/components/ClientSettingsModal";
 import { EntityTypeSelect, AddStatusLabelButton, DeleteStatusLabelButton } from "@/components/StatusLabelModal";
 import { PermissionsForm } from "@/components/PermissionsForm";
 import { AddUserButton, UserActiveToggle, UserRoleSelect, ChangePasswordButton } from "@/components/UserModal";
@@ -194,7 +194,10 @@ export default async function SettingsPage({ searchParams }) {
                       <StatusBadge status={cl.status} />
                     </td>
                     <td className="px-3 py-3">
-                      <ClientStatusButton clientId={cl.client_id} status={cl.status} />
+                      <div className="flex items-center gap-3">
+                        <EditClientButton clientId={cl.client_id} clientName={cl.client_name} />
+                        <ClientStatusButton clientId={cl.client_id} status={cl.status} />
+                      </div>
                     </td>
                   </tr>
                 ))}
