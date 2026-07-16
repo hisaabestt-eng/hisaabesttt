@@ -21,8 +21,6 @@ export default async function PaymentAllocationsPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const rawYear = params?.year || String(new Date().getFullYear());
-  const year = rawYear === "all" ? "" : rawYear;
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -34,11 +32,19 @@ export default async function PaymentAllocationsPage({ searchParams }) {
   )?.client_id;
   const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
-  const [invoices, session, permissions, years] = await Promise.all([
+  const years = await getInvoiceYears(compId);
+  // Defaulting to the current year hides everything for a company whose
+  // data is all from a past year — only do it when the current year
+  // actually has data; otherwise show everything (matches what the Year
+  // dropdown displays when nothing has been explicitly chosen).
+  const currentYear = new Date().getFullYear();
+  const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
+  const year = rawYear === "all" ? "" : rawYear;
+
+  const [invoices, session, permissions] = await Promise.all([
     listInvoiceSummaries({ compId, clientId, search, progress, year, yearType }),
     getServerSession(),
     getPermissions(),
-    getInvoiceYears(compId),
   ]);
   const canEdit = session.role === "admin" || permissions.can_edit;
 

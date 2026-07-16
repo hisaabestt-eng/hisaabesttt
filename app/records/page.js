@@ -30,8 +30,6 @@ export default async function RecordsPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const rawYear = params?.year || String(new Date().getFullYear());
-  const year = rawYear === "all" ? "" : rawYear;
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -43,13 +41,21 @@ export default async function RecordsPage({ searchParams }) {
   )?.client_id;
   const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
-  const [records, pickerClients, statusLabels, session, permissions, years] = await Promise.all([
+  const years = await getRecordYears(compId);
+  // Defaulting to the current year hides everything for a company whose
+  // data is all from a past year — only do it when the current year
+  // actually has data; otherwise show everything (matches what the Year
+  // dropdown displays when nothing has been explicitly chosen).
+  const currentYear = new Date().getFullYear();
+  const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
+  const year = rawYear === "all" ? "" : rawYear;
+
+  const [records, pickerClients, statusLabels, session, permissions] = await Promise.all([
     listRecords({ compId, clientId, search, progress, year, yearType }),
     getClientsForCompanyPicker(compId),
     getStatusLabels("record"),
     getServerSession(),
     getPermissions(),
-    getRecordYears(compId),
   ]);
   const progressOptions = [...RECORD_PROGRESS_OPTIONS, ...statusLabels.map((l) => l.label_name)];
   const canAdd = session.role === "admin" || permissions.can_add;

@@ -48,8 +48,6 @@ export default async function EstimatesPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const rawYear = params?.year || String(new Date().getFullYear());
-  const year = rawYear === "all" ? "" : rawYear;
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -61,13 +59,21 @@ export default async function EstimatesPage({ searchParams }) {
   )?.client_id;
   const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
-  const [estimates, recordsWithoutEstimate, statusLabels, session, permissions, years] = await Promise.all([
+  const years = await getEstimateYears(compId);
+  // Defaulting to the current year hides everything for a company whose
+  // data is all from a past year — only do it when the current year
+  // actually has data; otherwise show everything (matches what the Year
+  // dropdown displays when nothing has been explicitly chosen).
+  const currentYear = new Date().getFullYear();
+  const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
+  const year = rawYear === "all" ? "" : rawYear;
+
+  const [estimates, recordsWithoutEstimate, statusLabels, session, permissions] = await Promise.all([
     listEstimates({ compId, clientId, search, progress, year, yearType }),
     getRecordsWithoutEstimate(compId, clientId),
     getStatusLabels("estimate"),
     getServerSession(),
     getPermissions(),
-    getEstimateYears(compId),
   ]);
   const progressOptions = [...ESTIMATE_PROGRESS_OPTIONS, ...statusLabels.map((l) => l.label_name)];
   const canAdd = session.role === "admin" || permissions.can_add;

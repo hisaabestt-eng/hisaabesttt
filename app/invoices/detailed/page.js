@@ -37,8 +37,6 @@ export default async function DetailedInvoicesPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const rawYear = params?.year || String(new Date().getFullYear());
-  const year = rawYear === "all" ? "" : rawYear;
   const lifecycle = params?.lifecycle || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
@@ -46,10 +44,16 @@ export default async function DetailedInvoicesPage({ searchParams }) {
   const compId = params?.company || defaultCompany?.comp_id || "";
   const clientId = params?.client || "";
 
-  const [invoices, years] = await Promise.all([
-    getDetailedInvoices({ compId, clientId, search, year, yearType, lifecycle }),
-    getInvoiceYears(compId),
-  ]);
+  const years = await getInvoiceYears(compId);
+  // Defaulting to the current year hides everything for a company whose
+  // data is all from a past year — only do it when the current year
+  // actually has data; otherwise show everything (matches what the Year
+  // dropdown displays when nothing has been explicitly chosen).
+  const currentYear = new Date().getFullYear();
+  const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
+  const year = rawYear === "all" ? "" : rawYear;
+
+  const invoices = await getDetailedInvoices({ compId, clientId, search, year, yearType, lifecycle });
 
   // Archived/Cancelled invoices don't represent a real GST/TDS liability, so
   // they're excluded from the totals line entirely even though they still

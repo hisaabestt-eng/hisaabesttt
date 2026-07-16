@@ -18,8 +18,6 @@ export default async function Home({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const rawYear = params?.year || String(new Date().getFullYear());
-  const year = rawYear === "all" ? "" : rawYear;
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -32,10 +30,16 @@ export default async function Home({ searchParams }) {
   )?.client_id;
   const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
-  const [overview, years] = await Promise.all([
-    getRecordsOverview({ compId, clientId, search, progress, year, yearType }),
-    getEstimateYears(compId),
-  ]);
+  const years = await getEstimateYears(compId);
+  // Defaulting to the current year hides everything for a company whose
+  // data is all from a past year — only do it when the current year
+  // actually has data; otherwise show everything (matches what the Year
+  // dropdown displays when nothing has been explicitly chosen).
+  const currentYear = new Date().getFullYear();
+  const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
+  const year = rawYear === "all" ? "" : rawYear;
+
+  const overview = await getRecordsOverview({ compId, clientId, search, progress, year, yearType });
   const totalAmount = overview.rows.reduce((sum, row) => sum + (Number(row.estimate_amount) || 0), 0);
 
   return (
