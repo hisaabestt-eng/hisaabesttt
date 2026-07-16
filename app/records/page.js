@@ -12,7 +12,7 @@ function formatMoney(value) {
   return Number(value).toLocaleString("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
 }
 
