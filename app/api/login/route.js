@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticateUser } from "@/lib/users";
-import { signSession, SESSION_MAX_AGE_SECONDS } from "@/lib/session";
+import { signSession } from "@/lib/session";
 
 export async function POST(request) {
   const { username, password } = await request.json();
@@ -22,7 +22,6 @@ export async function POST(request) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_MAX_AGE_SECONDS,
   });
   return res;
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveSession, SESSION_MAX_AGE_SECONDS } from "@/lib/session";
+import { resolveSession, signSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
 
 // Every entity's mutating routes live under one of these prefixes and follow
@@ -59,17 +59,17 @@ function forbidden(pathname, request, message) {
   return NextResponse.redirect(new URL("/", request.url));
 }
 
-// Re-stamps the session cookie with a fresh 10-minute expiry on every
-// authenticated request (whether it ultimately succeeds or gets a 403), so
-// active use keeps sliding the window forward — only genuine inactivity lets
-// it expire and forces a fresh login.
-function refreshSession(response, token) {
-  response.cookies.set("session", token, {
+// Re-signs the session with a fresh issued-at time on every authenticated
+// request (whether it ultimately succeeds or gets a 403), so active use
+// keeps sliding the 10-minute inactivity window forward. The cookie itself
+// has no maxAge — it's a true browser session cookie, gone the moment the
+// browser closes, regardless of how recently it was refreshed.
+function refreshSession(response, userId) {
+  response.cookies.set("session", signSession(userId), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_MAX_AGE_SECONDS,
   });
   return response;
 }
@@ -91,7 +91,7 @@ export async function proxy(request) {
     pathname === "/settings" || ADMIN_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   if (isAdminOnlyPath && session.role !== "admin") {
-    return refreshSession(forbidden(pathname, request, "Admin access required"), token);
+    return refreshSession(forbidden(pathname, request, "Admin access required"), session.userId);
   }
 
   const action = classifyAction(pathname, request.method);
@@ -102,11 +102,14 @@ export async function proxy(request) {
       (action === "edit" && permissions.can_edit) ||
       (action === "delete" && permissions.can_delete);
     if (!allowed) {
-      return refreshSession(forbidden(pathname, request, `You don't have permission to ${action} this.`), token);
+      return refreshSession(
+        forbidden(pathname, request, `You don't have permission to ${action} this.`),
+        session.userId
+      );
     }
   }
 
-  return refreshSession(NextResponse.next(), token);
+  return refreshSession(NextResponse.next(), session.userId);
 }
 
 export const config = {
