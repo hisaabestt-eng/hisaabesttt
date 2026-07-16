@@ -5,7 +5,7 @@ import { listActivity } from "@/lib/activityLog";
 import { listUsers } from "@/lib/users";
 import { getServerSession } from "@/lib/session";
 import { CompanySelect, SearchBox } from "@/components/MainFilterBar";
-import { AddCompanyButton, CompanyStatusButton } from "@/components/CompanyModal";
+import { AddCompanyButton, EditCompanyButton, CompanyStatusButton } from "@/components/CompanyModal";
 import { AddClientButton, ClientStatusButton } from "@/components/ClientSettingsModal";
 import { EntityTypeSelect, AddStatusLabelButton, DeleteStatusLabelButton } from "@/components/StatusLabelModal";
 import { PermissionsForm } from "@/components/PermissionsForm";
@@ -139,7 +139,10 @@ export default async function SettingsPage({ searchParams }) {
                       <StatusBadge status={c.status} />
                     </td>
                     <td className="px-3 py-3">
-                      <CompanyStatusButton compId={c.comp_id} status={c.status} />
+                      <div className="flex items-center gap-3">
+                        <EditCompanyButton compId={c.comp_id} companyName={c.company_name} />
+                        <CompanyStatusButton compId={c.comp_id} status={c.status} />
+                      </div>
                     </td>
                   </tr>
                 ))}
