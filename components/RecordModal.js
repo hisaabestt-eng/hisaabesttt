@@ -13,6 +13,15 @@ function toDateInputValue(value) {
   return `${year}-${month}-${day}`;
 }
 
+// Excel date cells parse into JS Date objects (cellDates: true) — left as-is,
+// JSON.stringify would convert them to a UTC ISO string, which shifts to the
+// previous day in IST and fails the server's date validation. Convert to a
+// plain YYYY-MM-DD using local date parts before it ever reaches JSON.
+function toDateOnlyString(value) {
+  if (!(value instanceof Date)) return value;
+  return toDateInputValue(value);
+}
+
 export function AddRecordButton({ compId, clients }) {
   const [open, setOpen] = useState(false);
   const [clientList, setClientList] = useState(clients);
@@ -271,7 +280,7 @@ export function BulkUploadRecordsButton({ compId }) {
       const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
       rows = json.map((r) => ({
         clientName: r["Client Name"],
-        recordDate: r["Record Date"],
+        recordDate: toDateOnlyString(r["Record Date"]),
         description: r["Description"],
         amount: r["Amount"],
       }));

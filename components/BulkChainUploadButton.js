@@ -22,6 +22,18 @@ const TEMPLATE_HEADERS = [
   "Invoice Document Link",
 ];
 
+// Excel date cells parse into JS Date objects (cellDates: true) — left as-is,
+// JSON.stringify would convert them to a UTC ISO string, which shifts to the
+// previous day in IST and fails the server's date validation. Convert to a
+// plain YYYY-MM-DD using local date parts before it ever reaches JSON.
+function toDateOnlyString(value) {
+  if (!(value instanceof Date)) return value;
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 // Bulk-imports a full Record -> Estimate -> PO -> Invoice chain from one
 // spreadsheet — one row per deal, stopping at whichever stage that deal has
 // actually reached (a row can end at just a Record, or go all the way to an
@@ -88,17 +100,17 @@ export function BulkChainUploadButton({ compId }) {
       const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
       rows = json.map((r) => ({
         clientName: r["Client Name"],
-        recordDate: r["Record Date"],
+        recordDate: toDateOnlyString(r["Record Date"]),
         description: r["Description"],
         amount: r["Amount"],
         estNo: r["Estimate No"],
-        estDate: r["Estimate Date"],
+        estDate: toDateOnlyString(r["Estimate Date"]),
         estDocLink: r["Estimate Document Link"],
         poNo: r["PO No"],
-        poDate: r["PO Date"],
+        poDate: toDateOnlyString(r["PO Date"]),
         poDocLink: r["PO Document Link"],
         invoiceNo: r["Invoice No"],
-        invoiceDate: r["Invoice Date"],
+        invoiceDate: toDateOnlyString(r["Invoice Date"]),
         invoiceAmount: r["Invoice Amount"],
         gstPct: r["GST %"],
         tdsPct: r["TDS %"],

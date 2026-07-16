@@ -3,6 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Excel date cells parse into JS Date objects (cellDates: true) — left as-is,
+// JSON.stringify would convert them to a UTC ISO string, which shifts to the
+// previous day in IST and fails the server's date validation. Convert to a
+// plain YYYY-MM-DD using local date parts before it ever reaches JSON. Safe
+// to apply to every column since non-Date values pass through unchanged.
+function toDateOnlyString(value) {
+  if (!(value instanceof Date)) return value;
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 // Generic Excel bulk-upload modal, reused by Estimates/PO/Invoices standalone
 // uploads. Each row is validated server-side before anything is written — if
 // any row has a mistake, the whole file is rejected and every problem (row +
@@ -60,7 +73,7 @@ export function BulkUploadButton({
       rows = json.map((r) => {
         const obj = {};
         columns.forEach((c) => {
-          obj[c.key] = r[c.header];
+          obj[c.key] = toDateOnlyString(r[c.header]);
         });
         return obj;
       });
