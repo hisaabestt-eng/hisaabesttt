@@ -37,7 +37,8 @@ export default async function DetailedInvoicesPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const year = params?.year || "";
+  const rawYear = params?.year || String(new Date().getFullYear());
+  const year = rawYear === "all" ? "" : rawYear;
   const lifecycle = params?.lifecycle || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
@@ -80,7 +81,7 @@ export default async function DetailedInvoicesPage({ searchParams }) {
         </div>
         <ClientSelect clients={[{ client_id: "", client_name: "All clients", comp_id: compId }, ...clients]} compId={compId} clientId={clientId} />
         <LifecycleFilter lifecycle={lifecycle} />
-        <YearFilter years={years} year={year} yearType={yearType} />
+        <YearFilter years={years} year={rawYear} yearType={yearType} />
       </div>
 
       <div className="text-sm text-gray-600 dark:text-gray-400">

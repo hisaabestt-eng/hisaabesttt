@@ -32,13 +32,18 @@ export default async function PaymentsPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const year = params?.year || "";
+  const rawYear = params?.year || String(new Date().getFullYear());
+  const year = rawYear === "all" ? "" : rawYear;
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
   const compId = params?.company || defaultCompany?.comp_id || "";
   const clientsForCompany = clients.filter((c) => c.comp_id === compId);
-  const clientId = params?.client || clientsForCompany[0]?.client_id || "";
+  const selectedCompanyObj = companies.find((c) => c.comp_id === compId);
+  const defaultClientId = clientsForCompany.find(
+    (c) => c.client_id === selectedCompanyObj?.default_client_id
+  )?.client_id;
+  const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
   const [payments, outstandingInvoices, session, permissions, years] = await Promise.all([
     listPayments({ compId, clientId, search, year, yearType }),
@@ -72,7 +77,7 @@ export default async function PaymentsPage({ searchParams }) {
           <SearchBox search={search} />
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
-        <YearFilter years={years} year={year} yearType={yearType} />
+        <YearFilter years={years} year={rawYear} yearType={yearType} />
         {canAdd && (
           <AddPaymentButton key={`${compId}-${clientId}`} compId={compId} clientId={clientId} />
         )}

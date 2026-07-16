@@ -78,10 +78,12 @@ export function YearFilter({ years, year, yearType }) {
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  // Always writes the param (never deletes it) — including "all" — so a
+  // page reload can tell "user explicitly chose All years" apart from
+  // "no choice made yet" (which defaults to the current year instead).
   function handleYearChange(e) {
     const params = new URLSearchParams(window.location.search);
-    if (e.target.value) params.set("year", e.target.value);
-    else params.delete("year");
+    params.set("year", e.target.value);
     params.delete("page");
     router.push(`${pathname}?${params.toString()}`);
   }
@@ -97,11 +99,11 @@ export function YearFilter({ years, year, yearType }) {
         <option value="fy">Financial Year (Apr–Mar)</option>
       </select>
       <select
-        value={year || ""}
+        value={year || "all"}
         onChange={handleYearChange}
         className="rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
       >
-        <option value="">All years</option>
+        <option value="all">All years</option>
         {years.map((y) => (
           <option key={y} value={y}>
             {effectiveType === "fy" ? `FY ${y}-${String(y + 1).slice(-2)}` : y}

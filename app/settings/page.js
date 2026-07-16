@@ -5,8 +5,18 @@ import { listActivity } from "@/lib/activityLog";
 import { listUsers } from "@/lib/users";
 import { getServerSession } from "@/lib/session";
 import { CompanySelect, SearchBox } from "@/components/MainFilterBar";
-import { AddCompanyButton, EditCompanyButton, CompanyStatusButton } from "@/components/CompanyModal";
-import { AddClientButton, EditClientButton, ClientStatusButton } from "@/components/ClientSettingsModal";
+import {
+  AddCompanyButton,
+  EditCompanyButton,
+  CompanyStatusButton,
+  DefaultCompanyButton,
+} from "@/components/CompanyModal";
+import {
+  AddClientButton,
+  EditClientButton,
+  ClientStatusButton,
+  DefaultClientButton,
+} from "@/components/ClientSettingsModal";
 import { EntityTypeSelect, AddStatusLabelButton, DeleteStatusLabelButton } from "@/components/StatusLabelModal";
 import { PermissionsForm } from "@/components/PermissionsForm";
 import { AddUserButton, UserActiveToggle, UserRoleSelect, ChangePasswordButton } from "@/components/UserModal";
@@ -128,6 +138,7 @@ export default async function SettingsPage({ searchParams }) {
                 <tr>
                   <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Company Name</th>
                   <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
+                  <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Default</th>
                   <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
                 </tr>
               </thead>
@@ -137,6 +148,9 @@ export default async function SettingsPage({ searchParams }) {
                     <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{c.company_name}</td>
                     <td className="px-3 py-3 text-center">
                       <StatusBadge status={c.status} />
+                    </td>
+                    <td className="px-3 py-3 text-center">
+                      <DefaultCompanyButton compId={c.comp_id} isDefault={c.is_default} />
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
@@ -148,7 +162,7 @@ export default async function SettingsPage({ searchParams }) {
                 ))}
                 {allCompanies.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                    <td colSpan={4} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                       No companies found.
                     </td>
                   </tr>
@@ -183,6 +197,7 @@ export default async function SettingsPage({ searchParams }) {
                 <tr>
                   <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Client Name</th>
                   <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
+                  <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Default</th>
                   <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
                 </tr>
               </thead>
@@ -192,6 +207,15 @@ export default async function SettingsPage({ searchParams }) {
                     <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{cl.client_name}</td>
                     <td className="px-3 py-3 text-center">
                       <StatusBadge status={cl.status} />
+                    </td>
+                    <td className="px-3 py-3 text-center">
+                      {compId && (
+                        <DefaultClientButton
+                          compId={compId}
+                          clientId={cl.client_id}
+                          isDefault={cl.client_id === selectedCompany?.default_client_id}
+                        />
+                      )}
                     </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
@@ -203,7 +227,7 @@ export default async function SettingsPage({ searchParams }) {
                 ))}
                 {clients.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                    <td colSpan={4} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                       No clients found.
                     </td>
                   </tr>

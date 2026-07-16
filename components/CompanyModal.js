@@ -204,3 +204,35 @@ export function CompanyStatusButton({ compId, status }) {
     </button>
   );
 }
+
+export function DefaultCompanyButton({ compId, isDefault }) {
+  const [saving, setSaving] = useState(false);
+  const router = useRouter();
+
+  async function handleClick() {
+    setSaving(true);
+    const res = await fetch(`/api/companies-admin/${compId}/default`, { method: "POST" });
+    setSaving(false);
+    if (!res.ok) {
+      const data = await res.json();
+      alert(data.error || "Could not set default company");
+      return;
+    }
+    router.refresh();
+  }
+
+  if (isDefault) {
+    return <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Default</span>;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={saving}
+      className="text-xs text-gray-600 underline hover:text-gray-900 disabled:opacity-50 dark:text-gray-400 dark:hover:text-gray-100"
+    >
+      Set as Default
+    </button>
+  );
+}

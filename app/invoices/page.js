@@ -58,13 +58,18 @@ export default async function InvoicesPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
-  const year = params?.year || "";
+  const rawYear = params?.year || String(new Date().getFullYear());
+  const year = rawYear === "all" ? "" : rawYear;
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
   const compId = params?.company || defaultCompany?.comp_id || "";
   const clientsForCompany = clients.filter((c) => c.comp_id === compId);
-  const clientId = params?.client || clientsForCompany[0]?.client_id || "";
+  const selectedCompanyObj = companies.find((c) => c.comp_id === compId);
+  const defaultClientId = clientsForCompany.find(
+    (c) => c.client_id === selectedCompanyObj?.default_client_id
+  )?.client_id;
+  const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
   const [invoices, pos, estimatesForDirectInvoice, statusLabels, session, permissions, years] = await Promise.all([
     listInvoices({ compId, clientId, search, progress, year, yearType }),
@@ -106,7 +111,7 @@ export default async function InvoicesPage({ searchParams }) {
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
-        <YearFilter years={years} year={year} yearType={yearType} />
+        <YearFilter years={years} year={rawYear} yearType={yearType} />
         {canAdd && (
           <AddInvoiceButton
             key={`${compId}-${clientId}`}
