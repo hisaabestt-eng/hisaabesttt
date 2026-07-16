@@ -1,7 +1,8 @@
 import { getCompanies, getClients, getDefaultCompany, getRecordsOverview } from "@/lib/records";
-import { STATUS_STYLES } from "@/lib/status";
-import { CompanySelect, ClientSelect, SearchBox } from "@/components/MainFilterBar";
-import RecordDetailButton from "@/components/RecordDetailModal";
+import { getEstimateYears } from "@/lib/estimatesAdmin";
+import { MAIN_PROGRESS_OPTIONS } from "@/lib/status";
+import { CompanySelect, ClientSelect, SearchBox, ProgressFilter, YearFilter } from "@/components/MainFilterBar";
+import { RecordSummaryRow } from "@/components/RecordSummaryRow";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -12,18 +13,12 @@ function formatMoney(value) {
   });
 }
 
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 export default async function Home({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
+  const progress = params?.progress ? params.progress.split(",") : [];
+  const yearType = params?.yearType === "fy" ? "fy" : "calendar";
+  const year = params?.year || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -32,12 +27,16 @@ export default async function Home({ searchParams }) {
   const clientsForCompany = clients.filter((c) => c.comp_id === compId);
   const clientId = params?.client || clientsForCompany[0]?.client_id || "";
 
-  const overview = await getRecordsOverview({ compId, clientId, search });
+  const [overview, years] = await Promise.all([
+    getRecordsOverview({ compId, clientId, search, progress, year, yearType }),
+    getEstimateYears(compId),
+  ]);
+  const totalAmount = overview.rows.reduce((sum, row) => sum + (Number(row.estimate_amount) || 0), 0);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="mx-auto flex max-w-4xl flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-gray-900">Main Page</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Main Page</h1>
         <CompanySelect companies={companies} compId={compId} />
       </div>
 
@@ -46,50 +45,47 @@ export default async function Home({ searchParams }) {
           <SearchBox search={search} />
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
+        <ProgressFilter options={MAIN_PROGRESS_OPTIONS} selected={progress} />
+        <YearFilter years={years} year={year} yearType={yearType} />
       </div>
 
-      <div className="text-sm text-gray-600">{overview.total} records</div>
+      <div className="text-sm text-gray-600 dark:text-gray-400">{overview.total} records</div>
 
-      <div className="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-lg border bg-white">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="sticky top-0 bg-gray-50">
+      <div className="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
+        <table className="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
+          <thead className="sticky top-0 bg-gray-50 dark:bg-gray-900/40">
             <tr>
-              <th className="px-3 py-2 text-left font-medium text-gray-600">Date</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-600">Description</th>
-              <th className="px-3 py-2 text-right font-medium text-gray-600">Amount</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-600">Status</th>
+              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Date</th>
+              <th className="min-w-[320px] px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
+                Description
+              </th>
+              <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Amount</th>
+              <th className="w-40 px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {overview.rows.map((row) => (
-              <tr key={row.record_id}>
-                <td className="px-3 py-2 text-gray-700">{formatDate(row.estimate_date)}</td>
-                <td className="px-3 py-2 text-gray-700">
-                  <RecordDetailButton
-                    recordId={row.record_id}
-                    description={row.estimate_description}
-                  />
-                </td>
-                <td className="px-3 py-2 text-right text-gray-700">
-                  {formatMoney(row.estimate_amount)}
-                </td>
-                <td className="px-3 py-2">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[row.status]}`}
-                  >
-                    {row.status}
-                  </span>
-                </td>
-              </tr>
+              <RecordSummaryRow key={row.record_id} row={row} />
             ))}
             {overview.rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-3 py-6 text-center text-gray-500">
+                <td colSpan={4} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   No records found.
                 </td>
               </tr>
             )}
           </tbody>
+          {overview.rows.length > 0 && (
+            <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
+              <tr>
+                <td colSpan={2} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
+                  Total
+                </td>
+                <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totalAmount)}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>

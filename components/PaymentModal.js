@@ -23,21 +23,22 @@ function formatINR(value) {
 // client, then how much of the payment's remaining balance goes to it.
 // Options already picked in other rows are hidden so the same invoice
 // can't be allocated twice.
-function AllocationRow({ row, invoices, usedInvoiceNos, onChange, onRemove, canRemove }) {
+function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, onChange, onRemove, canRemove }) {
   const available = invoices.filter(
     (inv) => inv.invoice_no === row.invoiceNo || !usedInvoiceNos.includes(inv.invoice_no)
   );
   const selected = invoices.find((inv) => inv.invoice_no === row.invoiceNo);
+  const exceedsMax = maxAmount !== undefined && Number(row.amount) > maxAmount + 0.01;
 
   return (
     <div className="flex items-end gap-2">
       <div className="flex-1">
-        <label className="mb-1 block text-xs font-medium text-gray-500">Invoice</label>
+        <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Invoice</label>
         <select
           value={row.invoiceNo}
           onChange={(e) => onChange({ ...row, invoiceNo: e.target.value })}
           required
-          className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+          className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
         >
           <option value="">Select invoice…</option>
           {available.map((inv) => (
@@ -51,22 +52,30 @@ function AllocationRow({ row, invoices, usedInvoiceNos, onChange, onRemove, canR
         )}
       </div>
       <div className="w-36">
-        <label className="mb-1 block text-xs font-medium text-gray-500">Amount</label>
+        <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Amount</label>
         <input
           type="number"
           min="0"
+          max={maxAmount !== undefined ? maxAmount : undefined}
           step="0.01"
           value={row.amount}
           onChange={(e) => onChange({ ...row, amount: e.target.value })}
           required
-          className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+          className={`w-full rounded-md border px-2 py-1.5 text-sm dark:bg-gray-700 dark:text-gray-100 ${
+            exceedsMax ? "border-red-400" : "border-gray-300 dark:border-gray-600"
+          }`}
         />
+        {maxAmount !== undefined && (
+          <p className={`mt-1 text-xs ${exceedsMax ? "text-red-600" : "text-gray-400"}`}>
+            Max: {formatINR(maxAmount)}
+          </p>
+        )}
       </div>
       <button
         type="button"
         onClick={onRemove}
         disabled={!canRemove}
-        className="mb-1.5 rounded border px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+        className="mb-1.5 rounded-md border px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-700"
       >
         ✕
       </button>
@@ -112,7 +121,7 @@ export function AddPaymentButton({ compId, clientId }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+        className="rounded-full bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
       >
         + Add Payment
       </button>
@@ -125,25 +134,25 @@ export function AddPaymentButton({ compId, clientId }) {
           <form
             onSubmit={handleSubmit}
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-5 shadow-xl"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white dark:bg-gray-800 p-5 shadow-xl"
           >
-            <h2 className="mb-3 text-base font-semibold text-gray-900">Add Payment</h2>
+            <h2 className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">Add Payment</h2>
             {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
 
             <div className="flex flex-col gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-500">Payment Date</label>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Payment Date</label>
                 <input
                   type="date"
                   value={paymentDate}
                   onChange={(e) => setPaymentDate(e.target.value)}
                   required
-                  className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-500">Amount Received</label>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Amount Received</label>
                 <input
                   type="number"
                   min="0"
@@ -151,17 +160,17 @@ export function AddPaymentButton({ compId, clientId }) {
                   value={amountReceived}
                   onChange={(e) => setAmountReceived(e.target.value)}
                   required
-                  className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-500">Remarks (optional)</label>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Remarks (optional)</label>
                 <input
                   type="text"
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
               </div>
             </div>
@@ -170,14 +179,14 @@ export function AddPaymentButton({ compId, clientId }) {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                className="rounded-md border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                className="rounded-full bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -193,7 +202,7 @@ export function AddPaymentButton({ compId, clientId }) {
 // more of the client's outstanding invoices.
 export function AllocatePaymentButton({ payment, outstandingInvoices }) {
   const [open, setOpen] = useState(false);
-  const [allocationDate, setAllocationDate] = useState(toDateInputValue());
+  const [allocationDate, setAllocationDate] = useState(toDateInputValue(payment.payment_date));
   const [rows, setRows] = useState([{ invoiceNo: outstandingInvoices[0]?.invoice_no || "", amount: "" }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -213,6 +222,19 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
 
   function removeRow(index) {
     setRows((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  // outstandingInvoices' balances shrink after each allocation, but this
+  // component doesn't remount between opens — re-sync to a fresh single row
+  // so it doesn't show a stale invoice/amount from a previous allocation.
+  // Allocation date defaults to the payment's own date (money was received
+  // then, so that's the natural default) rather than today — and since it's
+  // read fresh from `payment` each time, editing the payment's date later
+  // carries through automatically the next time this is opened.
+  function handleOpen() {
+    setAllocationDate(toDateInputValue(payment.payment_date));
+    setRows([{ invoiceNo: outstandingInvoices[0]?.invoice_no || "", amount: "" }]);
+    setOpen(true);
   }
 
   async function handleSubmit(e) {
@@ -246,7 +268,7 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         className="text-xs text-blue-600 underline hover:text-blue-800"
       >
         Allocate
@@ -260,30 +282,30 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
           <form
             onSubmit={handleSubmit}
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white p-5 shadow-xl"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg bg-white dark:bg-gray-800 p-5 shadow-xl"
           >
-            <h2 className="mb-3 text-base font-semibold text-gray-900">Allocate Payment</h2>
+            <h2 className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">Allocate Payment</h2>
             {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
 
-            <div className="mb-3 rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600">
+            <div className="mb-3 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
               Unallocated balance on this payment: {formatINR(payment.balance)}
             </div>
 
             <div className="flex flex-col gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-500">Allocation Date</label>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Allocation Date</label>
                 <input
                   type="date"
                   value={allocationDate}
                   onChange={(e) => setAllocationDate(e.target.value)}
                   required
-                  className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
               </div>
 
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <label className="text-xs font-medium text-gray-500">Allocate to Invoices</label>
+                  <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Allocate to Invoices</label>
                   {rows.length < outstandingInvoices.length && (
                     <button type="button" onClick={addRow} className="text-xs text-blue-600 underline">
                       + Add another invoice
@@ -291,33 +313,45 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
                   )}
                 </div>
                 <div className="flex flex-col gap-2">
-                  {rows.map((row, i) => (
-                    <AllocationRow
-                      key={i}
-                      row={row}
-                      invoices={outstandingInvoices}
-                      usedInvoiceNos={usedInvoiceNos}
-                      onChange={(next) => updateRow(i, next)}
-                      onRemove={() => removeRow(i)}
-                      canRemove={rows.length > 1}
-                    />
-                  ))}
+                  {rows.map((row, i) => {
+                    const selected = outstandingInvoices.find((inv) => inv.invoice_no === row.invoiceNo);
+                    const otherRowsTotal = totalAllocated - (Number(row.amount) || 0);
+                    const remainingPaymentForRow = Number(payment.balance) - otherRowsTotal;
+                    const maxAmount = selected
+                      ? Math.min(Number(selected.balance), remainingPaymentForRow)
+                      : remainingPaymentForRow;
+                    return (
+                      <AllocationRow
+                        key={i}
+                        row={row}
+                        invoices={outstandingInvoices}
+                        usedInvoiceNos={usedInvoiceNos}
+                        maxAmount={maxAmount}
+                        onChange={(next) => updateRow(i, next)}
+                        onRemove={() => removeRow(i)}
+                        canRemove={rows.length > 1}
+                      />
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-                <div className="flex justify-between text-gray-600">
+              <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+                <div className="flex justify-between text-gray-600 dark:text-gray-400">
                   <span>Allocated</span>
                   <span>{formatINR(totalAllocated)}</span>
                 </div>
-                <div
-                  className={`mt-1 flex justify-between font-medium ${
-                    remainingToAllocate < -0.01 ? "text-red-600" : "text-gray-700"
-                  }`}
-                >
-                  <span>Unallocated</span>
-                  <span>{formatINR(remainingToAllocate)}</span>
-                </div>
+                {remainingToAllocate < -0.01 ? (
+                  <div className="mt-1 flex justify-between font-medium text-red-600">
+                    <span>Over-allocated by</span>
+                    <span>{formatINR(-remainingToAllocate)}</span>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex justify-between font-medium text-gray-700 dark:text-gray-300">
+                    <span>Unallocated</span>
+                    <span>{formatINR(remainingToAllocate)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -325,14 +359,14 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                className="rounded-md border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={saving}
-                className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                disabled={saving || remainingToAllocate < -0.01}
+                className="rounded-full bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save"}
               </button>
@@ -377,7 +411,7 @@ export function EditPaymentButton({ payment }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-xs text-gray-600 underline hover:text-gray-900"
+        className="text-xs text-gray-600 underline hover:text-gray-900 dark:text-gray-100"
       >
         Edit
       </button>
@@ -390,39 +424,39 @@ export function EditPaymentButton({ payment }) {
           <form
             onSubmit={handleSubmit}
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white p-5 shadow-xl"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white dark:bg-gray-800 p-5 shadow-xl"
           >
-            <h2 className="mb-3 text-base font-semibold text-gray-900">Edit Payment</h2>
+            <h2 className="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">Edit Payment</h2>
             {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
 
             <div className="flex flex-col gap-3">
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-500">Payment Date</label>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Payment Date</label>
                 <input
                   type="date"
                   value={paymentDate}
                   onChange={(e) => setPaymentDate(e.target.value)}
                   required
-                  className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-500">Remarks (optional)</label>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Remarks (optional)</label>
                 <input
                   type="text"
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="w-full rounded border-gray-300 px-2 py-1.5 text-sm"
+                  className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
               </div>
 
               {payment.allocations.length > 0 && (
-                <div className="rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-                  <div className="mb-1 text-xs font-medium text-gray-500">
+                <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
+                  <div className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                     Allocated to (not editable here)
                   </div>
                   {payment.allocations.map((a) => (
-                    <div key={a.invoice_no} className="flex justify-between text-gray-600">
+                    <div key={a.invoice_no} className="flex justify-between text-gray-600 dark:text-gray-400">
                       <span>{a.invoice_no}</span>
                       <span>{formatINR(a.amount)}</span>
                     </div>
@@ -438,14 +472,14 @@ export function EditPaymentButton({ payment }) {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                className="rounded-md border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded bg-gray-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                className="rounded-full bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save"}
               </button>

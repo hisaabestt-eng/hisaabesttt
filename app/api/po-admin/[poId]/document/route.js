@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { pool } from "@/lib/db";
-import { saveDocument, saveDocumentLink } from "@/lib/documents";
+import { saveDocumentLink } from "@/lib/documents";
+import { writeActivity } from "@/lib/activityLog";
+import { getServerSession } from "@/lib/session";
 
 export async function POST(request, { params }) {
   const { poId } = await params;
   const formData = await request.formData();
-  const file = formData.get("file");
   const url = formData.get("url");
 
-  if ((!file || typeof file === "string") && !url) {
-    return NextResponse.json({ error: "No file or link provided" }, { status: 400 });
+  if (!url) {
+    return NextResponse.json({ error: "No link provided" }, { status: 400 });
   }
 
   const { rows } = await pool.query(
@@ -22,24 +23,23 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: "Purchase Order not found" }, { status: 404 });
   }
 
-  if (url) {
-    const result = await saveDocumentLink({
-      module: "Purchase Order",
-      compId: rows[0].comp_id,
-      recordId: rows[0].record_id,
-      moduleId: poId,
-      url,
-    });
-    return NextResponse.json(result);
-  }
-
-  const { fileName, publicPath } = await saveDocument({
+  const result = await saveDocumentLink({
     module: "Purchase Order",
     compId: rows[0].comp_id,
     recordId: rows[0].record_id,
     moduleId: poId,
-    file,
+    url,
   });
 
-  return NextResponse.json({ fileName, publicPath });
+  const session = await getServerSession();
+  await writeActivity({
+    entityType: "po",
+    entityId: poId,
+    action: "Updated",
+    description: `Attached document link to Purchase Order ${poId}`,
+    performedBy: session.name,
+    performedByRole: session.role,
+  });
+
+  return NextResponse.json(result);
 }

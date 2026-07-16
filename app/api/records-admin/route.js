@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createRecord } from "@/lib/recordsAdmin";
+import { writeActivity } from "@/lib/activityLog";
+import { getServerSession } from "@/lib/session";
 
 export async function POST(request) {
   const body = await request.json();
@@ -10,5 +12,16 @@ export async function POST(request) {
   }
 
   const recordId = await createRecord({ compId, clientId, recordDate, description, amount });
+
+  const session = await getServerSession();
+  await writeActivity({
+    entityType: "record",
+    entityId: recordId,
+    action: "Created",
+    description: `Created Record ${recordId} — ${description}`,
+    performedBy: session.name,
+    performedByRole: session.role,
+  });
+
   return NextResponse.json({ recordId });
 }

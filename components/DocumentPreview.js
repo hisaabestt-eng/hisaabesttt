@@ -79,11 +79,11 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
           onClick={() => setOpen(false)}
         >
           <div
-            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-white shadow-xl"
+            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b px-4 py-2">
-              <span className="text-sm font-medium text-gray-700">Preview</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Preview</span>
               <div className="flex items-center gap-3">
                 <a
                   href={href}
@@ -96,7 +96,7 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="text-gray-400 hover:text-gray-700"
+                  className="text-gray-400 hover:text-gray-700 dark:text-gray-300"
                 >
                   ✕
                 </button>
@@ -111,7 +111,7 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
               )}
               {info.kind === "excel" && (
                 <div className="p-4">
-                  {loading && <p className="text-sm text-gray-500">Loading…</p>}
+                  {loading && <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>}
                   {error && <p className="text-sm text-red-600">{error}</p>}
                   {tableHtml && (
                     <div

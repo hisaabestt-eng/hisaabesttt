@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPayment } from "@/lib/paymentsAdmin";
+import { writeActivity } from "@/lib/activityLog";
+import { getServerSession } from "@/lib/session";
 
 export async function POST(request) {
   const body = await request.json();
@@ -11,6 +13,17 @@ export async function POST(request) {
 
   try {
     const pyId = await createPayment(body);
+
+    const session = await getServerSession();
+    await writeActivity({
+      entityType: "payment",
+      entityId: pyId,
+      action: "Created",
+      description: `Recorded Payment of ₹${amountReceived}`,
+      performedBy: session.name,
+      performedByRole: session.role,
+    });
+
     return NextResponse.json({ pyId });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });

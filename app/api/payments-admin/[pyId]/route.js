@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { updatePayment, deletePayment } from "@/lib/paymentsAdmin";
+import { writeActivity } from "@/lib/activityLog";
+import { getServerSession } from "@/lib/session";
 
 export async function PUT(request, { params }) {
   const { pyId } = await params;
@@ -12,6 +14,17 @@ export async function PUT(request, { params }) {
 
   try {
     await updatePayment(pyId, { paymentDate, remarks });
+
+    const session = await getServerSession();
+    await writeActivity({
+      entityType: "payment",
+      entityId: pyId,
+      action: "Updated",
+      description: `Updated Payment ${pyId}`,
+      performedBy: session.name,
+      performedByRole: session.role,
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
@@ -22,6 +35,17 @@ export async function DELETE(request, { params }) {
   const { pyId } = await params;
   try {
     await deletePayment(pyId);
+
+    const session = await getServerSession();
+    await writeActivity({
+      entityType: "payment",
+      entityId: pyId,
+      action: "Deleted",
+      description: `Deleted Payment ${pyId}`,
+      performedBy: session.name,
+      performedByRole: session.role,
+    });
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
