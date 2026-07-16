@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 // Build the yyyy-mm-dd string from local date parts, not toISOString(),
 // which converts to UTC and can shift the date by a day in IST.
@@ -25,6 +25,7 @@ export function AddRecordButton({ compId, clients }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const pathname = usePathname();
 
   async function handleAddClient() {
     if (!newClientName.trim()) return;
@@ -64,7 +65,14 @@ export function AddRecordButton({ compId, clients }) {
     setOpen(false);
     setDescription("");
     setAmount("");
-    router.refresh();
+    // The page's Client filter shows exactly one client at a time — if it
+    // isn't already the one this record was just added for, a plain
+    // router.refresh() would leave the new record invisible until the user
+    // manually switches the filter. Navigate there directly instead.
+    const params = new URLSearchParams(window.location.search);
+    params.set("company", compId);
+    params.set("client", clientId);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   return (
