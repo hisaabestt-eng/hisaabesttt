@@ -7,6 +7,7 @@ const TABS = [
   { key: "clients", label: "Clients" },
   { key: "labels", label: "Status Labels" },
   { key: "bulk", label: "Bulk Upload" },
+  { key: "export", label: "Export" },
   { key: "permissions", label: "Permissions" },
   { key: "users", label: "Users" },
   { key: "activity", label: "Activity Log" },

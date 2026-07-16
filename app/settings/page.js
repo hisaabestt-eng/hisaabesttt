@@ -1,10 +1,10 @@
-import { getCompanies, getDefaultCompany } from "@/lib/records";
+import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
 import { getAllCompanies, getAllClientsForSettings, getStatusLabels } from "@/lib/settingsAdmin";
 import { getPermissions } from "@/lib/permissions";
 import { listActivity } from "@/lib/activityLog";
 import { listUsers } from "@/lib/users";
 import { getServerSession } from "@/lib/session";
-import { CompanySelect, SearchBox } from "@/components/MainFilterBar";
+import { CompanySelect, ClientSelect, SearchBox } from "@/components/MainFilterBar";
 import {
   AddCompanyButton,
   EditCompanyButton,
@@ -24,8 +24,17 @@ import { SettingsTabs } from "@/components/SettingsTabs";
 import { BulkUploadRecordsButton } from "@/components/RecordModal";
 import { BulkChainUploadButton } from "@/components/BulkChainUploadButton";
 import { BulkUploadButton } from "@/components/BulkUploadButton";
+import { ExportButton } from "@/components/ExportButton";
 
-const TAB_KEYS = ["companies", "clients", "labels", "bulk", "permissions", "users", "activity"];
+const TAB_KEYS = ["companies", "clients", "labels", "bulk", "export", "permissions", "users", "activity"];
+
+const EXPORT_ENTITIES = [
+  { entity: "records", label: "Export Records", fileName: "records-export.xlsx" },
+  { entity: "estimates", label: "Export Estimates", fileName: "estimates-export.xlsx" },
+  { entity: "po", label: "Export Purchase Orders", fileName: "purchase-orders-export.xlsx" },
+  { entity: "invoices", label: "Export Invoices", fileName: "invoices-export.xlsx" },
+  { entity: "payments", label: "Export Payments", fileName: "payments-export.xlsx" },
+];
 
 const ENTITY_TYPE_LABELS = {
   record: "Records",
@@ -102,20 +111,23 @@ export default async function SettingsPage({ searchParams }) {
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
   const compId = params?.company || defaultCompany?.comp_id || "";
   const selectedCompany = companies.find((c) => c.comp_id === compId);
+  const clientId = params?.client || "";
 
   const entityType = ["record", "estimate", "po", "invoice"].includes(params?.entityType)
     ? params.entityType
     : "record";
 
-  const [allCompanies, clients, statusLabels, permissions, activity, users, session] = await Promise.all([
-    getAllCompanies(),
-    getAllClientsForSettings({ compId, search }),
-    getStatusLabels(entityType),
-    getPermissions(),
-    listActivity(),
-    listUsers(),
-    getServerSession(),
-  ]);
+  const [allCompanies, clients, allClients, statusLabels, permissions, activity, users, session] =
+    await Promise.all([
+      getAllCompanies(),
+      getAllClientsForSettings({ compId, search }),
+      getClients(),
+      getStatusLabels(entityType),
+      getPermissions(),
+      listActivity(),
+      listUsers(),
+      getServerSession(),
+    ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -335,6 +347,38 @@ export default async function SettingsPage({ searchParams }) {
               templateName="invoices-bulk-upload-template.xlsx"
               entityLabel="invoice"
             />
+          </div>
+        </div>
+      )}
+
+      {tab === "export" && (
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              Export{selectedCompany ? ` for ${selectedCompany.company_name}` : ""}
+            </h2>
+            <CompanySelect companies={companies} compId={compId} />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <ClientSelect clients={allClients} compId={compId} clientId={clientId} />
+          </div>
+
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Downloads an Excel file for the selected company{clientId ? " and client" : " (all clients)"}.
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {EXPORT_ENTITIES.map((e) => (
+              <ExportButton
+                key={`${e.entity}-${compId}-${clientId}`}
+                entity={e.entity}
+                label={e.label}
+                compId={compId}
+                clientId={clientId}
+                fileName={e.fileName}
+              />
+            ))}
           </div>
         </div>
       )}
