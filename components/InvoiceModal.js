@@ -497,11 +497,10 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
   // tracking into one dropdown — Submitted reveals a small inline panel for
   // the method + date, same idea as invoiceDisplayStatus in lib/status.js.
   const [statusChoice, setStatusChoice] = useState(invoiceDisplayStatus(invoice));
-  const [submitMethod, setSubmitMethod] = useState(
+  const submitMethod =
     invoice.submission_status && invoice.submission_status !== "Not Submitted"
       ? invoice.submission_status
-      : "Emailed"
-  );
+      : "Submitted";
   const [submissionDate, setSubmissionDate] = useState(
     invoice.submission_date ? toDateInputValue(invoice.submission_date) : toDateInputValue()
   );
@@ -701,16 +700,6 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
 
               {statusChoice === "Submitted" && (
                 <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
-                  <div className="mb-2">
-                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Submitted On</label>
-                    <input
-                      type="text"
-                      value={submitMethod}
-                      onChange={(e) => setSubmitMethod(e.target.value)}
-                      placeholder="e.g. Email, Client Portal, WhatsApp"
-                      className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
-                    />
-                  </div>
                   <div className="mb-2">
                     <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
                       Submission Date
