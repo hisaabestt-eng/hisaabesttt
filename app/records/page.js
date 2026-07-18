@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
 import { listRecords, getClientsForCompanyPicker, getRecordYears } from "@/lib/recordsAdmin";
 import { getStatusLabels } from "@/lib/settingsAdmin";
@@ -110,7 +111,14 @@ export default async function RecordsPage({ searchParams }) {
                   {record.record_id}
                 </td>
                 <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(record.record_date)}</td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{record.description}</td>
+                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+                  <Link
+                    href={`/records/${record.record_id}`}
+                    className="underline decoration-dotted hover:text-gray-900 dark:hover:text-gray-100"
+                  >
+                    {record.description}
+                  </Link>
+                </td>
                 <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
                   {formatMoney(record.amount)}
                 </td>
