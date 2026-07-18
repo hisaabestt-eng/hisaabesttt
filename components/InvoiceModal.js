@@ -150,7 +150,7 @@ function AmountFields({
   );
 }
 
-export function AddInvoiceButton({ pos, estimates = [] }) {
+export function AddInvoiceButton({ pos, estimates = [], compId }) {
   const [open, setOpen] = useState(false);
   // Some clients skip PO and want an invoice straight off the Estimate —
   // "source" picks which picker (Purchase Order or Estimate) is in play.
@@ -255,7 +255,9 @@ export function AddInvoiceButton({ pos, estimates = [] }) {
   async function checkDuplicateThenSave() {
     if (!duplicateAcknowledged) {
       setSaving(true);
-      const checkRes = await fetch(`/api/invoices-admin/check-number?invoiceNo=${encodeURIComponent(invoiceNo)}`);
+      const checkRes = await fetch(
+        `/api/invoices-admin/check-number?invoiceNo=${encodeURIComponent(invoiceNo)}&compId=${encodeURIComponent(compId)}`
+      );
       const checkData = await checkRes.json();
       setSaving(false);
       if (checkData.exists) {

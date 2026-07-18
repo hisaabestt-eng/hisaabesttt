@@ -93,7 +93,9 @@ export default async function PurchaseOrdersPage({ searchParams }) {
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
-        {canAdd && <AddPOButton key={`${compId}-${clientId}`} estimatesWithoutPO={estimatesWithoutPO} />}
+        {canAdd && (
+          <AddPOButton key={`${compId}-${clientId}`} compId={compId} estimatesWithoutPO={estimatesWithoutPO} />
+        )}
       </div>
 
       <div className="text-sm text-gray-600 dark:text-gray-400">

@@ -100,7 +100,11 @@ export default async function EstimatesPage({ searchParams }) {
         <ProgressFilter options={progressOptions} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
         {canAdd && (
-          <AddEstimateButton key={`${compId}-${clientId}`} recordsWithoutEstimate={recordsWithoutEstimate} />
+          <AddEstimateButton
+            key={`${compId}-${clientId}`}
+            compId={compId}
+            recordsWithoutEstimate={recordsWithoutEstimate}
+          />
         )}
       </div>
 

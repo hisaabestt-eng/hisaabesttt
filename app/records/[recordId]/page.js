@@ -232,7 +232,7 @@ export default async function RecordDetailPage({ params }) {
             <p className="text-sm text-gray-400">No estimate yet.</p>
             {canAdd && (
               <div className="mt-3">
-                <AddEstimateButton recordsWithoutEstimate={recordPickerForEstimate} />
+                <AddEstimateButton compId={compId} recordsWithoutEstimate={recordPickerForEstimate} />
               </div>
             )}
           </>
@@ -273,7 +273,7 @@ export default async function RecordDetailPage({ params }) {
               <p className="text-sm text-gray-400">No purchase order yet.</p>
               {canAdd && (
                 <div className="mt-3">
-                  <AddPOButton estimatesWithoutPO={estimatePickerForPO} />
+                  <AddPOButton compId={compId} estimatesWithoutPO={estimatePickerForPO} />
                 </div>
               )}
             </>
@@ -331,7 +331,7 @@ export default async function RecordDetailPage({ params }) {
           )}
           {canAdd && canAddInvoice && (
             <div className="mt-3">
-              <AddInvoiceButton pos={poPickerForInvoice} estimates={estimatePickerForDirectInvoice} />
+              <AddInvoiceButton compId={compId} pos={poPickerForInvoice} estimates={estimatePickerForDirectInvoice} />
             </div>
           )}
         </Section>

@@ -13,7 +13,7 @@ function toDateInputValue(value) {
   return `${year}-${month}-${day}`;
 }
 
-export function AddPOButton({ estimatesWithoutPO }) {
+export function AddPOButton({ estimatesWithoutPO, compId }) {
   const [open, setOpen] = useState(false);
   const [estId, setEstId] = useState(estimatesWithoutPO[0]?.est_id || "");
   const [poNo, setPoNo] = useState("");
@@ -62,7 +62,9 @@ export function AddPOButton({ estimatesWithoutPO }) {
 
     if (!duplicateAcknowledged) {
       setSaving(true);
-      const checkRes = await fetch(`/api/po-admin/check-number?poNo=${encodeURIComponent(poNo)}`);
+      const checkRes = await fetch(
+        `/api/po-admin/check-number?poNo=${encodeURIComponent(poNo)}&compId=${encodeURIComponent(compId)}`
+      );
       const checkData = await checkRes.json();
       setSaving(false);
       if (checkData.exists) {

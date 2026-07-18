@@ -121,6 +121,7 @@ export default async function InvoicesPage({ searchParams }) {
         {canAdd && (
           <AddInvoiceButton
             key={`${compId}-${clientId}`}
+            compId={compId}
             pos={pos}
             estimates={estimatesForDirectInvoice}
           />

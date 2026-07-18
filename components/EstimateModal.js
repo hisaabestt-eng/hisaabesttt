@@ -13,7 +13,7 @@ function toDateInputValue(value) {
   return `${year}-${month}-${day}`;
 }
 
-export function AddEstimateButton({ recordsWithoutEstimate }) {
+export function AddEstimateButton({ recordsWithoutEstimate, compId }) {
   const [open, setOpen] = useState(false);
   const [recordId, setRecordId] = useState(recordsWithoutEstimate[0]?.record_id || "");
   const [estNo, setEstNo] = useState("");
@@ -62,7 +62,9 @@ export function AddEstimateButton({ recordsWithoutEstimate }) {
 
     if (!duplicateAcknowledged) {
       setSaving(true);
-      const checkRes = await fetch(`/api/estimates-admin/check-number?estNo=${encodeURIComponent(estNo)}`);
+      const checkRes = await fetch(
+        `/api/estimates-admin/check-number?estNo=${encodeURIComponent(estNo)}&compId=${encodeURIComponent(compId)}`
+      );
       const checkData = await checkRes.json();
       setSaving(false);
       if (checkData.exists) {
