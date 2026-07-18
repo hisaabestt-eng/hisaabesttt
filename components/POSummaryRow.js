@@ -23,13 +23,6 @@ function formatDate(value) {
   });
 }
 
-function invoiceLifecycle(inv) {
-  const status = (inv.status || "").trim().toLowerCase();
-  if (status.includes("canc")) return "Cancelled";
-  if (inv.is_archived || status.includes("archiv")) return "Archived";
-  return "Raised";
-}
-
 // Mirrors InvoiceSummaryRow on the Payment Allocations page: click the PO
 // row to expand and see exactly which invoice(s) were raised against it —
 // so a partially-billed PO's remaining balance is easy to explain at a glance.
@@ -121,6 +114,7 @@ export function POSummaryRow({ po, statusLabels = [], docFileExists, canEdit = t
                       <th className="px-3 pb-0 pt-2.5 text-right font-medium">Invoice Amount</th>
                       <th className="px-3 pb-0 pt-2.5 text-right font-medium">Invoice Total</th>
                       <th className="px-3 pb-0 pt-2.5 text-center font-medium">Status</th>
+                      <th className="px-3 pb-0 pt-2.5 text-center font-medium">Progress</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -136,12 +130,22 @@ export function POSummaryRow({ po, statusLabels = [], docFileExists, canEdit = t
                         </td>
                         <td className="px-3 py-2 text-center">
                           <span
-                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                              LIFECYCLE_STYLES[invoiceLifecycle(inv)]
-                            }`}
+                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${LIFECYCLE_STYLES[inv.lifecycle]}`}
                           >
-                            {invoiceLifecycle(inv)}
+                            {inv.lifecycle}
                           </span>
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${progressStyle(inv)}`}
+                          >
+                            {progressLabel(inv, "Invoice")}
+                          </span>
+                          {inv.status === "Scheduled" && inv.scheduled_payment_date && (
+                            <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                              {formatDate(inv.scheduled_payment_date)}
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))}
