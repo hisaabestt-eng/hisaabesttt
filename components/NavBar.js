@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import LogoutButton from "./LogoutButton";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -34,8 +34,19 @@ function findActiveHref(pathname, links) {
 
 export default function NavBar({ session }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const links = session?.role === "admin" ? [...BASE_LINKS, ...ADMIN_LINKS] : BASE_LINKS;
   const activeHref = findActiveHref(pathname, links);
+
+  // Carries the currently selected Company/Client along to whichever page
+  // the user clicks next, so it only resets to each page's own default when
+  // the site is opened fresh (no params) — not every time they switch pages.
+  const carryParams = new URLSearchParams();
+  const company = searchParams.get("company");
+  const client = searchParams.get("client");
+  if (company) carryParams.set("company", company);
+  if (client) carryParams.set("client", client);
+  const suffix = carryParams.toString() ? `?${carryParams.toString()}` : "";
 
   return (
     <nav className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -50,7 +61,7 @@ export default function NavBar({ session }) {
               return (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  href={`${link.href}${suffix}`}
                   className={`rounded-full px-3 py-1.5 transition-colors ${
                     isActive
                       ? "bg-blue-600 text-white"
