@@ -164,7 +164,7 @@ export default async function DetailedInvoicesPage({ searchParams }) {
                     </span>
                     {invoiceDisplayStatus(inv) === "Submitted" && inv.submission_date && (
                       <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                        {inv.submission_status} · {formatDate(inv.submission_date)}
+                        {formatDate(inv.submission_date)}
                       </div>
                     )}
                   </td>
