@@ -168,7 +168,10 @@ export default async function RecordDetailPage({ params }) {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <Link href="/records" className="text-sm text-blue-600 underline">
+      <Link
+        href={`/records?company=${record.comp_id}&client=${record.client_id}`}
+        className="text-sm text-blue-600 underline"
+      >
         ← Back to Records
       </Link>
 
