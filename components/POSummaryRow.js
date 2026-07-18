@@ -79,14 +79,6 @@ export function POSummaryRow({ po, statusLabels = [], docFileExists, canEdit = t
             {lifecycleDisplay(po).label}
           </span>
         </td>
-        <td className="px-3 py-3 text-center">
-          <span className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${progressStyle(po)}`}>
-            {progressLabel(po, "PO")}
-          </span>
-          {po.status === "Scheduled" && po.scheduled_payment_date && (
-            <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{formatDate(po.scheduled_payment_date)}</div>
-          )}
-        </td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-2">
             {canEdit && <EditPOButton po={po} statusLabels={statusLabels} />}
@@ -96,7 +88,7 @@ export function POSummaryRow({ po, statusLabels = [], docFileExists, canEdit = t
       </tr>
       {open && (
         <tr>
-          <td colSpan={11} className="bg-gray-50 p-3 dark:bg-gray-900/40">
+          <td colSpan={10} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-900/40">
                 Invoices raised against {po.po_no}

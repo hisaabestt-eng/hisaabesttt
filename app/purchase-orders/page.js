@@ -117,7 +117,6 @@ export default async function PurchaseOrdersPage({ searchParams }) {
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Balance to Invoice</th>
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Document</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
-              <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Progress</th>
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
@@ -134,7 +133,7 @@ export default async function PurchaseOrdersPage({ searchParams }) {
             ))}
             {purchaseOrders.length === 0 && (
               <tr>
-                <td colSpan={11} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={10} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   No purchase orders found.
                 </td>
               </tr>
@@ -149,7 +148,7 @@ export default async function PurchaseOrdersPage({ searchParams }) {
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.amount)}</td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.invoiced)}</td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.balance)}</td>
-                <td colSpan={4}></td>
+                <td colSpan={3}></td>
               </tr>
             </tfoot>
           )}
