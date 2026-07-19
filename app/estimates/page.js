@@ -3,13 +3,15 @@ import path from "path";
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
 import { listEstimates, getEstimateYears } from "@/lib/estimatesAdmin";
 import { getRecordsWithoutEstimate } from "@/lib/recordsAdmin";
+import { listPOs } from "@/lib/poAdmin";
+import { listInvoices } from "@/lib/invoicesAdmin";
 import { getStatusLabels } from "@/lib/settingsAdmin";
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
-import { progressLabel, progressStyle, lifecycleDisplay, ESTIMATE_PROGRESS_OPTIONS } from "@/lib/status";
+import { ESTIMATE_PROGRESS_OPTIONS } from "@/lib/status";
 import { CompanySelect, ClientSelect, SearchBox, ProgressFilter, YearFilter } from "@/components/MainFilterBar";
-import { AddEstimateButton, EditEstimateButton, DeleteEstimateButton } from "@/components/EstimateModal";
-import { DocumentPreviewLink } from "@/components/DocumentPreview";
+import { AddEstimateButton } from "@/components/EstimateModal";
+import { EstimateSummaryRow } from "@/components/EstimateSummaryRow";
 
 // Uploaded files are stored on disk as "<est_id>-<original name>". Old seed
 // data has document *rows* with no real file behind them (upload wasn't
@@ -31,15 +33,6 @@ function formatMoney(value) {
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 2,
-  });
-}
-
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
   });
 }
 
@@ -68,13 +61,18 @@ export default async function EstimatesPage({ searchParams }) {
   const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
   const year = rawYear === "all" ? "" : rawYear;
 
-  const [estimates, recordsWithoutEstimate, statusLabels, session, permissions] = await Promise.all([
-    listEstimates({ compId, clientId, search, progress, year, yearType }),
-    getRecordsWithoutEstimate(compId, clientId),
-    getStatusLabels("estimate"),
-    getServerSession(),
-    getPermissions(),
-  ]);
+  const NO_FILTER = { search: "", progress: [], year: "", yearType: "calendar" };
+  const [estimates, recordsWithoutEstimate, statusLabels, poStatusLabels, allPOs, allInvoices, session, permissions] =
+    await Promise.all([
+      listEstimates({ compId, clientId, search, progress, year, yearType }),
+      getRecordsWithoutEstimate(compId, clientId),
+      getStatusLabels("estimate"),
+      getStatusLabels("po"),
+      listPOs({ compId, clientId: "", ...NO_FILTER }),
+      listInvoices({ compId, clientId: "", ...NO_FILTER }),
+      getServerSession(),
+      getPermissions(),
+    ]);
   const progressOptions = [...ESTIMATE_PROGRESS_OPTIONS, ...statusLabels.map((l) => l.label_name)];
   const canAdd = session.role === "admin" || permissions.can_add;
   const canEdit = session.role === "admin" || permissions.can_edit;
@@ -128,65 +126,25 @@ export default async function EstimatesPage({ searchParams }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {estimates.map((est) => (
-              <tr key={est.est_id} className="hover:bg-gray-50">
-                <td className="px-3 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{est.record_id}</td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{est.est_no}</td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(est.estimate_date)}</td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{est.description}</td>
-                <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(est.amount)}</td>
-                <td className="px-3 py-3">
-                  {est.external_url ? (
-                    <DocumentPreviewLink
-                      href={est.external_url}
-                      externalUrl={est.external_url}
-                      className="text-xs text-blue-600 underline"
-                    >
-                      🔗 External Link
-                    </DocumentPreviewLink>
-                  ) : est.doc_id && documentFileExists(est.est_id, est.file_name) ? (
-                    <DocumentPreviewLink
-                      href={`/uploads/estimates/${storedFileName(est.est_id, est.file_name)}`}
-                      fileName={est.file_name}
-                      className="text-xs text-blue-600 underline"
-                    >
-                      📎 {est.file_name}
-                    </DocumentPreviewLink>
-                  ) : est.doc_id ? (
-                    <span className="text-xs text-gray-400" title="Uploaded before file storage was set up">
-                      📎 {est.file_name} (no file)
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-400">No document</span>
-                  )}
-                </td>
-                <td className="px-3 py-3 text-center">
-                  <span
-                    className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${lifecycleDisplay(est).style}`}
-                  >
-                    {lifecycleDisplay(est).label}
-                  </span>
-                </td>
-                <td className="px-3 py-3 text-center">
-                  <span
-                    className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${progressStyle(est)}`}
-                  >
-                    {progressLabel(est, "Estimate")}
-                  </span>
-                  {est.status === "Scheduled" && est.scheduled_payment_date && (
-                    <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      {formatDate(est.scheduled_payment_date)}
-                    </div>
-                  )}
-                </td>
-                <td className="px-3 py-3">
-                  <div className="flex gap-2">
-                    {canEdit && <EditEstimateButton estimate={est} statusLabels={statusLabels} />}
-                    {canDelete && !est.po_id && <DeleteEstimateButton estId={est.est_id} />}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {estimates.map((est) => {
+              const po = est.po_id ? allPOs.find((p) => p.po_id === est.po_id) : null;
+              const invoices = po
+                ? allInvoices.filter((inv) => inv.po_no === po.po_no)
+                : allInvoices.filter((inv) => inv.est_id === est.est_id);
+              return (
+                <EstimateSummaryRow
+                  key={est.est_id}
+                  est={est}
+                  po={po}
+                  invoices={invoices}
+                  statusLabels={statusLabels}
+                  poStatusLabels={poStatusLabels}
+                  docFileExists={est.doc_id ? documentFileExists(est.est_id, est.file_name) : false}
+                  canEdit={canEdit}
+                  canDelete={canDelete}
+                />
+              );
+            })}
             {estimates.length === 0 && (
               <tr>
                 <td colSpan={9} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">

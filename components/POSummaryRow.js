@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { LIFECYCLE_STYLES, progressLabel, progressStyle, lifecycleDisplay } from "@/lib/status";
+import { lifecycleDisplay } from "@/lib/status";
 import { EditPOButton, DeletePOButton } from "./POModal";
 import { DocumentPreviewLink } from "./DocumentPreview";
+import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -93,57 +94,10 @@ export function POSummaryRow({ po, statusLabels = [], docFileExists, canEdit = t
               <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-900/40">
                 Invoices raised against {po.po_no}
               </div>
-              {invoices.length === 0 ? (
-                <p className="px-3 py-2.5 text-xs text-gray-400">
-                  No invoice yet — balance to invoice is the full PO amount ({formatMoney(po.amount)}).
-                </p>
-              ) : (
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="text-xs text-gray-500 dark:text-gray-400">
-                      <th className="px-3 pb-0 pt-2.5 text-left font-medium">Invoice No</th>
-                      <th className="px-3 pb-0 pt-2.5 text-left font-medium">Invoice Date</th>
-                      <th className="px-3 pb-0 pt-2.5 text-right font-medium">Invoice Amount</th>
-                      <th className="px-3 pb-0 pt-2.5 text-right font-medium">Invoice Total</th>
-                      <th className="px-3 pb-0 pt-2.5 text-center font-medium">Status</th>
-                      <th className="px-3 pb-0 pt-2.5 text-center font-medium">Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {invoices.map((inv) => (
-                      <tr key={inv.inv_id}>
-                        <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{inv.invoice_no}</td>
-                        <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{formatDate(inv.invoice_date)}</td>
-                        <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
-                          {formatMoney(inv.invoice_amount)}
-                        </td>
-                        <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
-                          {formatMoney(inv.invoice_total)}
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          <span
-                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${LIFECYCLE_STYLES[inv.lifecycle]}`}
-                          >
-                            {inv.lifecycle}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          <span
-                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${progressStyle(inv)}`}
-                          >
-                            {progressLabel(inv, "Invoice")}
-                          </span>
-                          {inv.status === "Scheduled" && inv.scheduled_payment_date && (
-                            <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                              {formatDate(inv.scheduled_payment_date)}
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
+              <InvoiceBreakdownTable
+                invoices={invoices}
+                emptyMessage={`No invoice yet — balance to invoice is the full PO amount (${formatMoney(po.amount)}).`}
+              />
               {Number(po.invoice_balance) > 0.01 && (
                 <p className="border-t border-gray-100 px-3 py-2 text-xs text-amber-600">
                   Still to invoice: {formatMoney(po.invoice_balance)} of {formatMoney(po.amount)}.

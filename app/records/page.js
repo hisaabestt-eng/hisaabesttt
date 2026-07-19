@@ -1,12 +1,15 @@
-import Link from "next/link";
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
 import { listRecords, getClientsForCompanyPicker, getRecordYears } from "@/lib/recordsAdmin";
+import { listEstimates } from "@/lib/estimatesAdmin";
+import { listPOs } from "@/lib/poAdmin";
+import { listInvoices } from "@/lib/invoicesAdmin";
 import { getStatusLabels } from "@/lib/settingsAdmin";
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
-import { progressLabel, progressStyle, lifecycleDisplay, RECORD_PROGRESS_OPTIONS } from "@/lib/status";
+import { RECORD_PROGRESS_OPTIONS } from "@/lib/status";
 import { CompanySelect, ClientSelect, SearchBox, ProgressFilter, YearFilter } from "@/components/MainFilterBar";
-import { AddRecordButton, EditRecordButton, DeleteRecordButton } from "@/components/RecordModal";
+import { AddRecordButton } from "@/components/RecordModal";
+import { RecordRow } from "@/components/RecordRow";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -14,15 +17,6 @@ function formatMoney(value) {
     style: "currency",
     currency: "INR",
     maximumFractionDigits: 2,
-  });
-}
-
-function formatDate(value) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
   });
 }
 
@@ -51,10 +45,27 @@ export default async function RecordsPage({ searchParams }) {
   const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
   const year = rawYear === "all" ? "" : rawYear;
 
-  const [records, pickerClients, statusLabels, session, permissions] = await Promise.all([
+  const NO_FILTER = { search: "", progress: [], year: "", yearType: "calendar" };
+  const [
+    records,
+    pickerClients,
+    statusLabels,
+    estimateStatusLabels,
+    poStatusLabels,
+    allEstimates,
+    allPOs,
+    allInvoices,
+    session,
+    permissions,
+  ] = await Promise.all([
     listRecords({ compId, clientId, search, progress, year, yearType }),
     getClientsForCompanyPicker(compId),
     getStatusLabels("record"),
+    getStatusLabels("estimate"),
+    getStatusLabels("po"),
+    listEstimates({ compId, clientId: "", ...NO_FILTER }),
+    listPOs({ compId, clientId: "", ...NO_FILTER }),
+    listInvoices({ compId, clientId: "", ...NO_FILTER }),
     getServerSession(),
     getPermissions(),
   ]);
@@ -105,50 +116,29 @@ export default async function RecordsPage({ searchParams }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {records.map((record) => (
-              <tr key={record.record_id} className="hover:bg-gray-50">
-                <td className="px-3 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
-                  {record.record_id}
-                </td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(record.record_date)}</td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
-                  <Link
-                    href={`/records/${record.record_id}`}
-                    className="underline decoration-dotted hover:text-gray-900 dark:hover:text-gray-100"
-                  >
-                    {record.description}
-                  </Link>
-                </td>
-                <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
-                  {formatMoney(record.amount)}
-                </td>
-                <td className="px-3 py-3 text-center">
-                  <span
-                    className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${lifecycleDisplay(record).style}`}
-                  >
-                    {lifecycleDisplay(record).label}
-                  </span>
-                </td>
-                <td className="px-3 py-3 text-center">
-                  <span
-                    className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${progressStyle(record)}`}
-                  >
-                    {progressLabel(record, "Record")}
-                  </span>
-                  {record.status === "Scheduled" && record.scheduled_payment_date && (
-                    <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                      {formatDate(record.scheduled_payment_date)}
-                    </div>
-                  )}
-                </td>
-                <td className="px-3 py-3">
-                  <div className="flex gap-2">
-                    {canEdit && <EditRecordButton record={record} statusLabels={statusLabels} />}
-                    {canDelete && !record.est_id && <DeleteRecordButton recordId={record.record_id} />}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {records.map((record) => {
+              const estimate = record.est_id ? allEstimates.find((e) => e.est_id === record.est_id) : null;
+              const po = record.po_id ? allPOs.find((p) => p.po_id === record.po_id) : null;
+              const invoices = po
+                ? allInvoices.filter((inv) => inv.po_no === po.po_no)
+                : estimate
+                  ? allInvoices.filter((inv) => inv.est_id === estimate.est_id)
+                  : [];
+              return (
+                <RecordRow
+                  key={record.record_id}
+                  record={record}
+                  estimate={estimate}
+                  po={po}
+                  invoices={invoices}
+                  statusLabels={statusLabels}
+                  estimateStatusLabels={estimateStatusLabels}
+                  poStatusLabels={poStatusLabels}
+                  canEdit={canEdit}
+                  canDelete={canDelete}
+                />
+              );
+            })}
             {records.length === 0 && (
               <tr>
                 <td colSpan={7} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
