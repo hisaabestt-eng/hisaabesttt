@@ -111,7 +111,6 @@ export default async function RecordsPage({ searchParams }) {
               </th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Amount</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
-              <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Progress</th>
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
@@ -141,7 +140,7 @@ export default async function RecordsPage({ searchParams }) {
             })}
             {records.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={6} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   No records found.
                 </td>
               </tr>
@@ -156,7 +155,7 @@ export default async function RecordsPage({ searchParams }) {
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">
                   {formatMoney(totalAmount)}
                 </td>
-                <td colSpan={3}></td>
+                <td colSpan={2}></td>
               </tr>
             </tfoot>
           )}

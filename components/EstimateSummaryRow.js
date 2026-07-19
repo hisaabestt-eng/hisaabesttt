@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { lifecycleDisplay, progressLabel, progressStyle } from "@/lib/status";
+import { lifecycleDisplay } from "@/lib/status";
 import { EditEstimateButton, DeleteEstimateButton } from "./EstimateModal";
 import { EditPOButton, DeletePOButton } from "./POModal";
 import { DocumentPreviewLink } from "./DocumentPreview";
@@ -92,18 +92,6 @@ export function EstimateSummaryRow({
             {lifecycleDisplay(est).label}
           </span>
         </td>
-        <td className="px-3 py-3 text-center">
-          <span
-            className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${progressStyle(est)}`}
-          >
-            {progressLabel(est, "Estimate")}
-          </span>
-          {est.status === "Scheduled" && est.scheduled_payment_date && (
-            <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-              {formatDate(est.scheduled_payment_date)}
-            </div>
-          )}
-        </td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-2">
             {canEdit && <EditEstimateButton estimate={est} statusLabels={statusLabels} />}
@@ -113,7 +101,7 @@ export function EstimateSummaryRow({
       </tr>
       {open && (
         <tr>
-          <td colSpan={9} className="bg-gray-50 p-3 dark:bg-gray-900/40">
+          <td colSpan={8} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               {po ? (
                 <>

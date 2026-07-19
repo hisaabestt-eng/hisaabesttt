@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { lifecycleDisplay, progressLabel, progressStyle } from "@/lib/status";
+import { lifecycleDisplay } from "@/lib/status";
 import { EditRecordButton, DeleteRecordButton } from "./RecordModal";
 import { EditEstimateButton, DeleteEstimateButton } from "./EstimateModal";
 import { EditPOButton, DeletePOButton } from "./POModal";
@@ -75,18 +75,6 @@ export function RecordRow({
             {lifecycleDisplay(record).label}
           </span>
         </td>
-        <td className="px-3 py-3 text-center">
-          <span
-            className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${progressStyle(record)}`}
-          >
-            {progressLabel(record, "Record")}
-          </span>
-          {record.status === "Scheduled" && record.scheduled_payment_date && (
-            <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-              {formatDate(record.scheduled_payment_date)}
-            </div>
-          )}
-        </td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-2">
             {canEdit && <EditRecordButton record={record} statusLabels={statusLabels} />}
@@ -96,7 +84,7 @@ export function RecordRow({
       </tr>
       {open && (
         <tr>
-          <td colSpan={7} className="bg-gray-50 p-3 dark:bg-gray-900/40">
+          <td colSpan={6} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               {estimate ? (
                 <>
