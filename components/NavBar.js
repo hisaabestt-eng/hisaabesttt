@@ -13,7 +13,6 @@ const BASE_LINKS = [
   { href: "/invoices", label: "Invoices" },
   { href: "/payments", label: "Payments" },
   { href: "/payments/allocations", label: "Payment Allocations" },
-  { href: "/master", label: "Master Table" },
 ];
 
 // Settings holds company/client management and the permissions toggle

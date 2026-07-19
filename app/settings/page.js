@@ -25,8 +25,10 @@ import { BulkUploadRecordsButton } from "@/components/RecordModal";
 import { BulkChainUploadButton } from "@/components/BulkChainUploadButton";
 import { BulkUploadButton } from "@/components/BulkUploadButton";
 import { ExportButton } from "@/components/ExportButton";
+import { getMasterTable } from "@/lib/masterTable";
+import { MasterTable } from "@/components/MasterTable";
 
-const TAB_KEYS = ["companies", "clients", "labels", "bulk", "export", "permissions", "users", "activity"];
+const TAB_KEYS = ["companies", "clients", "labels", "bulk", "export", "master", "permissions", "users", "activity"];
 
 const EXPORT_ENTITIES = [
   { entity: "records", label: "Export Records", fileName: "records-export.xlsx" },
@@ -117,17 +119,37 @@ export default async function SettingsPage({ searchParams }) {
     ? params.entityType
     : "record";
 
-  const [allCompanies, clients, allClients, statusLabels, permissions, activity, users, session] =
-    await Promise.all([
-      getAllCompanies(),
-      getAllClientsForSettings({ compId, search }),
-      getClients(),
-      getStatusLabels(entityType),
-      getPermissions(),
-      listActivity(),
-      listUsers(),
-      getServerSession(),
-    ]);
+  const [
+    allCompanies,
+    clients,
+    allClients,
+    statusLabels,
+    recordStatusLabels,
+    estimateStatusLabels,
+    poStatusLabels,
+    invoiceStatusLabels,
+    masterRows,
+    permissions,
+    activity,
+    users,
+    session,
+  ] = await Promise.all([
+    getAllCompanies(),
+    getAllClientsForSettings({ compId, search }),
+    getClients(),
+    getStatusLabels(entityType),
+    getStatusLabels("record"),
+    getStatusLabels("estimate"),
+    getStatusLabels("po"),
+    getStatusLabels("invoice"),
+    getMasterTable({ compId, clientId }),
+    getPermissions(),
+    listActivity(),
+    listUsers(),
+    getServerSession(),
+  ]);
+  const canEdit = session.role === "admin" || permissions.can_edit;
+  const canDelete = session.role === "admin" || permissions.can_delete;
 
   return (
     <div className="flex flex-col gap-6">
@@ -380,6 +402,36 @@ export default async function SettingsPage({ searchParams }) {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {tab === "master" && (
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              Master Table{selectedCompany ? ` for ${selectedCompany.company_name}` : ""}
+            </h2>
+            <CompanySelect companies={companies} compId={compId} />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <ClientSelect clients={allClients} compId={compId} clientId={clientId} />
+          </div>
+
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {masterRows.length} row{masterRows.length === 1 ? "" : "s"} — every Record through Invoice, one row
+            per invoice
+          </div>
+
+          <MasterTable
+            rows={masterRows}
+            recordStatusLabels={recordStatusLabels}
+            estimateStatusLabels={estimateStatusLabels}
+            poStatusLabels={poStatusLabels}
+            invoiceStatusLabels={invoiceStatusLabels}
+            canEdit={canEdit}
+            canDelete={canDelete}
+          />
         </div>
       )}
 

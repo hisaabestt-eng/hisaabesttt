@@ -8,6 +8,7 @@ const TABS = [
   { key: "labels", label: "Status Labels" },
   { key: "bulk", label: "Bulk Upload" },
   { key: "export", label: "Export" },
+  { key: "master", label: "Master Table" },
   { key: "permissions", label: "Permissions" },
   { key: "users", label: "Users" },
   { key: "activity", label: "Activity Log" },
