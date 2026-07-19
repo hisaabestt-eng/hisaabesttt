@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { DateField } from "./DateField";
 
 // Build the yyyy-mm-dd string from local date parts, not toISOString(),
 // which converts to UTC and can shift the date by a day in IST.
@@ -170,10 +171,9 @@ export function AddRecordButton({ compId, clients }) {
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Record Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={recordDate}
-                  onChange={(e) => setRecordDate(e.target.value)}
+                  onChange={setRecordDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
@@ -471,10 +471,9 @@ export function EditRecordButton({ record, statusLabels = [] }) {
             <div className="flex flex-col gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Record Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={recordDate}
-                  onChange={(e) => setRecordDate(e.target.value)}
+                  onChange={setRecordDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />

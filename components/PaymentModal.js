@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { DateField } from "./DateField";
 
 function toDateInputValue(value) {
   const d = value ? new Date(value) : new Date();
@@ -142,10 +143,9 @@ export function AddPaymentButton({ compId, clientId }) {
             <div className="flex flex-col gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Payment Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
+                  onChange={setPaymentDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
@@ -294,10 +294,9 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
             <div className="flex flex-col gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Allocation Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={allocationDate}
-                  onChange={(e) => setAllocationDate(e.target.value)}
+                  onChange={setAllocationDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
@@ -432,10 +431,9 @@ export function EditPaymentButton({ payment }) {
             <div className="flex flex-col gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Payment Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
+                  onChange={setPaymentDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { progressLabel, progressStyle } from "@/lib/status";
+import { DateField } from "./DateField";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -88,10 +89,9 @@ function PaymentProgressCell({ invoice, canEdit }) {
           <option value="Rejected">Rejected</option>
         </select>
         {progressChoice === "Scheduled" && (
-          <input
-            type="date"
+          <DateField
             value={scheduledDate}
-            onChange={(e) => setScheduledDate(e.target.value)}
+            onChange={setScheduledDate}
             className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-1.5 py-1 text-xs"
           />
         )}

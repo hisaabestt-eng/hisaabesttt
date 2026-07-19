@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DocumentField, EMPTY_DOC, uploadDocumentField } from "./DocumentField";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { DateField } from "./DateField";
 import { invoiceDisplayStatus } from "@/lib/status";
 
 function toDateInputValue(value) {
@@ -410,10 +411,9 @@ export function AddInvoiceButton({ pos, estimates = [], compId }) {
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Invoice Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={invoiceDate}
-                  onChange={(e) => setInvoiceDate(e.target.value)}
+                  onChange={setInvoiceDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
@@ -646,10 +646,9 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Invoice Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={invoiceDate}
-                  onChange={(e) => setInvoiceDate(e.target.value)}
+                  onChange={setInvoiceDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
@@ -704,10 +703,9 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
                     <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
                       Submission Date
                     </label>
-                    <input
-                      type="date"
+                    <DateField
                       value={submissionDate}
-                      onChange={(e) => setSubmissionDate(e.target.value)}
+                      onChange={setSubmissionDate}
                       className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                     />
                   </div>
@@ -732,10 +730,9 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
                           <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
                             Expected Payment Date
                           </label>
-                          <input
-                            type="date"
+                          <DateField
                             value={scheduledPaymentDate}
-                            onChange={(e) => setScheduledPaymentDate(e.target.value)}
+                            onChange={setScheduledPaymentDate}
                             required
                             className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                           />

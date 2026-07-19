@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DocumentField, EMPTY_DOC, uploadDocumentField } from "./DocumentField";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { DateField } from "./DateField";
 
 function toDateInputValue(value) {
   const d = value ? new Date(value) : new Date();
@@ -159,10 +160,9 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId }) {
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Estimate Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={estDate}
-                  onChange={(e) => setEstDate(e.target.value)}
+                  onChange={setEstDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
@@ -320,10 +320,9 @@ export function EditEstimateButton({ estimate, statusLabels = [] }) {
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Estimate Date</label>
-                <input
-                  type="date"
+                <DateField
                   value={estDate}
-                  onChange={(e) => setEstDate(e.target.value)}
+                  onChange={setEstDate}
                   required
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
