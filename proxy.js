@@ -31,6 +31,7 @@ const ADMIN_ONLY_PREFIXES = [
 // outside the entity families above), otherwise "add" | "edit" | "delete".
 function classifyAction(pathname, method) {
   if (pathname === "/api/bulk-chain") return method === "GET" ? null : "add";
+  if (pathname === "/api/master-table/bulk-delete") return method === "GET" ? null : "delete";
 
   // These two don't follow the "-admin" naming convention (they predate it),
   // but they mutate data the same way and are reachable by the "user" role,
