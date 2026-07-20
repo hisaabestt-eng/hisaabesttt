@@ -14,10 +14,10 @@ function toDateInputValue(value) {
   return `${year}-${month}-${day}`;
 }
 
-export function AddEstimateButton({ recordsWithoutEstimate, compId }) {
+export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEstNo = "" }) {
   const [open, setOpen] = useState(false);
   const [recordId, setRecordId] = useState(recordsWithoutEstimate[0]?.record_id || "");
-  const [estNo, setEstNo] = useState("");
+  const [estNo, setEstNo] = useState(suggestedEstNo);
   const [estDate, setEstDate] = useState(toDateInputValue());
   const [description, setDescription] = useState(recordsWithoutEstimate[0]?.description || "");
   const [amount, setAmount] = useState(recordsWithoutEstimate[0]?.amount || "");
@@ -43,9 +43,9 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId }) {
     }
   }
 
-  // recordsWithoutEstimate shrinks after each estimate is created, but this
-  // component doesn't remount between opens — re-sync to the current first
-  // record so the fields don't show stale data for a record no longer in the list.
+  // recordsWithoutEstimate shrinks (and suggestedEstNo moves on) after each
+  // estimate is created, but this component doesn't remount between opens —
+  // re-sync to the current values so the fields don't show stale data.
   function handleOpen() {
     if (recordsWithoutEstimate.length === 0) {
       alert("No records without an estimate — add one on the Records page first.");
@@ -54,6 +54,8 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId }) {
     setRecordId(recordsWithoutEstimate[0]?.record_id || "");
     setDescription(recordsWithoutEstimate[0]?.description || "");
     setAmount(recordsWithoutEstimate[0]?.amount || "");
+    setEstNo(suggestedEstNo);
+    setDuplicateAcknowledged(false);
     setOpen(true);
   }
 

@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
 import path from "path";
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
-import { listEstimates, getEstimateYears } from "@/lib/estimatesAdmin";
+import { listEstimates, getEstimateYears, getSuggestedEstNo } from "@/lib/estimatesAdmin";
 import { getRecordsWithoutEstimate } from "@/lib/recordsAdmin";
 import { listPOs } from "@/lib/poAdmin";
 import { listInvoices } from "@/lib/invoicesAdmin";
@@ -62,17 +62,27 @@ export default async function EstimatesPage({ searchParams }) {
   const year = rawYear === "all" ? "" : rawYear;
 
   const NO_FILTER = { search: "", progress: [], year: "", yearType: "calendar" };
-  const [estimates, recordsWithoutEstimate, statusLabels, poStatusLabels, allPOs, allInvoices, session, permissions] =
-    await Promise.all([
-      listEstimates({ compId, clientId, search, progress, year, yearType }),
-      getRecordsWithoutEstimate(compId, clientId),
-      getStatusLabels("estimate"),
-      getStatusLabels("po"),
-      listPOs({ compId, clientId: "", ...NO_FILTER }),
-      listInvoices({ compId, clientId: "", ...NO_FILTER }),
-      getServerSession(),
-      getPermissions(),
-    ]);
+  const [
+    estimates,
+    recordsWithoutEstimate,
+    statusLabels,
+    poStatusLabels,
+    allPOs,
+    allInvoices,
+    suggestedEstNo,
+    session,
+    permissions,
+  ] = await Promise.all([
+    listEstimates({ compId, clientId, search, progress, year, yearType }),
+    getRecordsWithoutEstimate(compId, clientId),
+    getStatusLabels("estimate"),
+    getStatusLabels("po"),
+    listPOs({ compId, clientId: "", ...NO_FILTER }),
+    listInvoices({ compId, clientId: "", ...NO_FILTER }),
+    getSuggestedEstNo(compId),
+    getServerSession(),
+    getPermissions(),
+  ]);
   const progressOptions = [...ESTIMATE_PROGRESS_OPTIONS, ...statusLabels.map((l) => l.label_name)];
   const canAdd = session.role === "admin" || permissions.can_add;
   const canEdit = session.role === "admin" || permissions.can_edit;
@@ -102,6 +112,7 @@ export default async function EstimatesPage({ searchParams }) {
             key={`${compId}-${clientId}`}
             compId={compId}
             recordsWithoutEstimate={recordsWithoutEstimate}
+            suggestedEstNo={suggestedEstNo}
           />
         )}
       </div>
