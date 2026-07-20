@@ -14,10 +14,17 @@ function toDateInputValue(value) {
   return `${year}-${month}-${day}`;
 }
 
-export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEstNo = "" }) {
+export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEstNosByClient = {} }) {
+  // Each client has its own Estimate No numbering, so the suggestion has to
+  // follow whichever record (and therefore client) is currently selected.
+  function suggestionFor(recId) {
+    const rec = recordsWithoutEstimate.find((r) => r.record_id === recId);
+    return rec ? suggestedEstNosByClient[rec.client_id] || "" : "";
+  }
+
   const [open, setOpen] = useState(false);
   const [recordId, setRecordId] = useState(recordsWithoutEstimate[0]?.record_id || "");
-  const [estNo, setEstNo] = useState(suggestedEstNo);
+  const [estNo, setEstNo] = useState(suggestionFor(recordsWithoutEstimate[0]?.record_id));
   const [estDate, setEstDate] = useState(toDateInputValue());
   const [description, setDescription] = useState(recordsWithoutEstimate[0]?.description || "");
   const [amount, setAmount] = useState(recordsWithoutEstimate[0]?.amount || "");
@@ -41,9 +48,11 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEst
       setDescription(rec.description);
       setAmount(rec.amount);
     }
+    setEstNo(suggestionFor(id));
+    setDuplicateAcknowledged(false);
   }
 
-  // recordsWithoutEstimate shrinks (and suggestedEstNo moves on) after each
+  // recordsWithoutEstimate shrinks (and suggestions move on) after each
   // estimate is created, but this component doesn't remount between opens —
   // re-sync to the current values so the fields don't show stale data.
   function handleOpen() {
@@ -51,10 +60,11 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEst
       alert("No records without an estimate — add one on the Records page first.");
       return;
     }
-    setRecordId(recordsWithoutEstimate[0]?.record_id || "");
+    const firstId = recordsWithoutEstimate[0]?.record_id || "";
+    setRecordId(firstId);
     setDescription(recordsWithoutEstimate[0]?.description || "");
     setAmount(recordsWithoutEstimate[0]?.amount || "");
-    setEstNo(suggestedEstNo);
+    setEstNo(suggestionFor(firstId));
     setDuplicateAcknowledged(false);
     setOpen(true);
   }
@@ -65,8 +75,9 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEst
 
     if (!duplicateAcknowledged) {
       setSaving(true);
+      const clientId = recordsWithoutEstimate.find((r) => r.record_id === recordId)?.client_id || "";
       const checkRes = await fetch(
-        `/api/estimates-admin/check-number?estNo=${encodeURIComponent(estNo)}&compId=${encodeURIComponent(compId)}`
+        `/api/estimates-admin/check-number?estNo=${encodeURIComponent(estNo)}&compId=${encodeURIComponent(compId)}&clientId=${encodeURIComponent(clientId)}`
       );
       const checkData = await checkRes.json();
       setSaving(false);
