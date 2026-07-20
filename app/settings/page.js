@@ -51,6 +51,7 @@ const ACTIVITY_ENTITY_LABELS = {
   po: "Purchase Order",
   invoice: "Invoice",
   payment: "Payment",
+  user: "User",
 };
 
 const ESTIMATE_BULK_COLUMNS = [
