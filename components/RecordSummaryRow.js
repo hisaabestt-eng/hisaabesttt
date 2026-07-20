@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { STATUS_STYLES } from "@/lib/status";
 import RecordDetailButton from "./RecordDetailModal";
+import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -76,39 +77,7 @@ export function RecordSummaryRow({ row }) {
               <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-900/40">
                 Invoices for {row.estimate_description}
               </div>
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="text-xs text-gray-500 dark:text-gray-400">
-                    <th className="px-3 pb-0 pt-2.5 text-left font-medium">Invoice No</th>
-                    <th className="px-3 pb-0 pt-2.5 text-left font-medium">Invoice Date</th>
-                    <th className="px-3 pb-0 pt-2.5 text-right font-medium">Invoice Total</th>
-                    <th className="px-3 pb-0 pt-2.5 text-center font-medium">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {invoices.map((inv) => (
-                    <tr key={inv.inv_id}>
-                      <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{inv.invoice_no}</td>
-                      <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{formatDate(inv.invoice_date)}</td>
-                      <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
-                        {formatMoney(inv.invoice_total)}
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[inv.status]}`}
-                        >
-                          {inv.status}
-                        </span>
-                        {inv.status === "Scheduled" && inv.scheduled_payment_date && (
-                          <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                            {formatDate(inv.scheduled_payment_date)}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <InvoiceBreakdownTable invoices={invoices} emptyMessage="" />
             </div>
           </td>
         </tr>
