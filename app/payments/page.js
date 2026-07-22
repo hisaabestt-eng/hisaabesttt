@@ -3,12 +3,8 @@ import { listPayments, getOutstandingInvoices, getPaymentYears } from "@/lib/pay
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
 import { CompanySelect, ClientSelect, SearchBox, YearFilter } from "@/components/MainFilterBar";
-import {
-  AddPaymentButton,
-  AllocatePaymentButton,
-  EditPaymentButton,
-  DeletePaymentButton,
-} from "@/components/PaymentModal";
+import { AddPaymentButton } from "@/components/PaymentModal";
+import { PaymentRow } from "@/components/PaymentRow";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -109,40 +105,13 @@ export default async function PaymentsPage({ searchParams }) {
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {payments.map((py) => (
-              <tr key={py.py_id} className="hover:bg-gray-50">
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(py.payment_date)}</td>
-                <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
-                  {formatMoney(py.amount_received)}
-                </td>
-                <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(py.balance)}</td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
-                  {py.allocations.length === 0 ? (
-                    <span className="text-gray-400">Not allocated</span>
-                  ) : (
-                    <div className="flex flex-wrap gap-1">
-                      {py.allocations.map((a) => (
-                        <span
-                          key={a.invoice_no}
-                          className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                          title={`${formatMoney(a.amount)} of ${formatMoney(a.invoice_total)}`}
-                        >
-                          {a.invoice_no}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{py.remarks || "—"}</td>
-                <td className="px-3 py-3">
-                  <div className="flex gap-2">
-                    {canEdit && <EditPaymentButton payment={py} />}
-                    {canEdit && (
-                      <AllocatePaymentButton payment={py} outstandingInvoices={outstandingInvoices} />
-                    )}
-                    {canDelete && <DeletePaymentButton pyId={py.py_id} />}
-                  </div>
-                </td>
-              </tr>
+              <PaymentRow
+                key={py.py_id}
+                py={py}
+                outstandingInvoices={outstandingInvoices}
+                canEdit={canEdit}
+                canDelete={canDelete}
+              />
             ))}
             {payments.length === 0 && (
               <tr>
