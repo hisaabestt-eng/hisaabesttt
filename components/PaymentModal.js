@@ -37,7 +37,15 @@ function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, onChange, onR
         <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Invoice</label>
         <select
           value={row.invoiceNo}
-          onChange={(e) => onChange({ ...row, invoiceNo: e.target.value })}
+          onChange={(e) => {
+            const invoiceNo = e.target.value;
+            // Pre-fill with the invoice's own balance (capped by whatever's
+            // actually available for this row) so the common case — pay one
+            // invoice in full — needs no typing; still fully editable after.
+            const inv = invoices.find((i) => i.invoice_no === invoiceNo);
+            const suggested = inv ? Math.min(Number(inv.balance), maxAmount ?? Number(inv.balance)) : "";
+            onChange({ ...row, invoiceNo, amount: inv ? String(suggested) : "" });
+          }}
           required
           className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
         >
