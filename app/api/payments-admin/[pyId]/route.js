@@ -6,7 +6,7 @@ import { getServerSession } from "@/lib/session";
 export async function PUT(request, { params }) {
   const { pyId } = await params;
   const body = await request.json();
-  const { paymentDate, remarks, amountReceived } = body;
+  const { paymentDate, remarks, amountReceived, allocationEdits } = body;
 
   if (!paymentDate) {
     return NextResponse.json({ error: "Payment date is required" }, { status: 400 });
@@ -16,7 +16,7 @@ export async function PUT(request, { params }) {
   }
 
   try {
-    await updatePayment(pyId, { paymentDate, remarks, amountReceived });
+    await updatePayment(pyId, { paymentDate, remarks, amountReceived, allocationEdits });
 
     const session = await getServerSession();
     await writeActivity({

@@ -417,21 +417,32 @@ export function EditPaymentButton({ payment }) {
   const [paymentDate, setPaymentDate] = useState(toDateInputValue(payment.payment_date));
   const [amountReceived, setAmountReceived] = useState(String(payment.amount_received));
   const [remarks, setRemarks] = useState(payment.remarks || "");
+  const [allocationAmounts, setAllocationAmounts] = useState(() =>
+    Object.fromEntries((payment.allocations || []).map((a) => [a.invoice_no, String(a.amount)]))
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const alreadyAllocated = (payment.allocations || []).reduce((sum, a) => sum + Number(a.amount), 0);
-  const belowAllocated = Number(amountReceived) < alreadyAllocated - 0.01;
+  const allocatedTotal = Object.values(allocationAmounts).reduce((sum, v) => sum + (Number(v) || 0), 0);
+  const belowAllocated = Number(amountReceived) < allocatedTotal - 0.01;
+  const anyAllocationInvalid = (payment.allocations || []).some((a) => {
+    const amt = Number(allocationAmounts[a.invoice_no]);
+    return !(amt > 0) || amt > Number(a.invoice_total) + 0.01;
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     setSaving(true);
+    const allocationEdits = (payment.allocations || []).map((a) => ({
+      invoiceNo: a.invoice_no,
+      amount: allocationAmounts[a.invoice_no],
+    }));
     const res = await fetch(`/api/payments-admin/${payment.py_id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paymentDate, remarks, amountReceived }),
+      body: JSON.stringify({ paymentDate, remarks, amountReceived, allocationEdits }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -490,11 +501,11 @@ export function EditPaymentButton({ payment }) {
                     belowAllocated ? "border-red-400" : "border-gray-300 dark:border-gray-600"
                   }`}
                 />
-                {alreadyAllocated > 0 && (
+                {allocatedTotal > 0 && (
                   <p className={`mt-1 text-xs ${belowAllocated ? "text-red-600" : "text-gray-400"}`}>
                     {belowAllocated
-                      ? `Can't go below what's already allocated (${formatINR(alreadyAllocated)}).`
-                      : `Already allocated: ${formatINR(alreadyAllocated)}`}
+                      ? `Can't go below what's allocated to invoices below (${formatINR(allocatedTotal)}).`
+                      : `Allocated to invoices below: ${formatINR(allocatedTotal)}`}
                   </p>
                 )}
               </div>
@@ -510,18 +521,35 @@ export function EditPaymentButton({ payment }) {
 
               {payment.allocations.length > 0 && (
                 <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm">
-                  <div className="mb-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-                    Allocated to (not editable here)
+                  <div className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Allocated to</div>
+                  <div className="flex flex-col gap-2">
+                    {payment.allocations.map((a) => {
+                      const amt = allocationAmounts[a.invoice_no] ?? "";
+                      const exceedsInvoiceTotal = Number(amt) > Number(a.invoice_total) + 0.01;
+                      return (
+                        <div key={a.invoice_no} className="flex items-center justify-between gap-2">
+                          <span className="text-gray-600 dark:text-gray-400">{a.invoice_no}</span>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              max={a.invoice_total}
+                              value={amt}
+                              onChange={(e) =>
+                                setAllocationAmounts((prev) => ({ ...prev, [a.invoice_no]: e.target.value }))
+                              }
+                              required
+                              className={`w-28 rounded-md border px-2 py-1 text-right text-sm dark:bg-gray-700 dark:text-gray-100 ${
+                                exceedsInvoiceTotal ? "border-red-400" : "border-gray-300 dark:border-gray-600"
+                              }`}
+                            />
+                            <span className="text-xs text-gray-400">of {formatINR(a.invoice_total)}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {payment.allocations.map((a) => (
-                    <div key={a.invoice_no} className="flex justify-between text-gray-600 dark:text-gray-400">
-                      <span>{a.invoice_no}</span>
-                      <span>
-                        {formatINR(a.amount)}
-                        <span className="text-gray-400"> of {formatINR(a.invoice_total)} total</span>
-                      </span>
-                    </div>
-                  ))}
                   <p className="mt-2 text-xs text-gray-400">
                     To change which invoices this went to, delete this payment and record it again.
                   </p>
@@ -539,7 +567,7 @@ export function EditPaymentButton({ payment }) {
               </button>
               <button
                 type="submit"
-                disabled={saving || belowAllocated}
+                disabled={saving || belowAllocated || anyAllocationInvalid}
                 className="rounded-full bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save"}
