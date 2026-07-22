@@ -173,7 +173,9 @@ export function InvoiceSummaryRow({ invoice, canEdit = false }) {
         </td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(invoice.invoice_total)}</td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(invoice.total_received)}</td>
-        <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(invoice.balance_due)}</td>
+        <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
+          {invoice.lifecycle === "Raised" ? formatMoney(invoice.balance_due) : "—"}
+        </td>
         <td className="px-3 py-3 text-center">
           <PaymentProgressCell invoice={invoice} canEdit={canEdit} />
         </td>
