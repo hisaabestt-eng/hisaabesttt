@@ -516,7 +516,10 @@ export function EditPaymentButton({ payment }) {
                   {payment.allocations.map((a) => (
                     <div key={a.invoice_no} className="flex justify-between text-gray-600 dark:text-gray-400">
                       <span>{a.invoice_no}</span>
-                      <span>{formatINR(a.amount)}</span>
+                      <span>
+                        {formatINR(a.amount)}
+                        <span className="text-gray-400"> of {formatINR(a.invoice_total)} total</span>
+                      </span>
                     </div>
                   ))}
                   <p className="mt-2 text-xs text-gray-400">
