@@ -20,6 +20,14 @@ function formatINR(value) {
   });
 }
 
+// Plain JS subtraction on money values (e.g. balance - alreadyAllocated) can
+// leave floating-point noise like 84000.00000000001 — harmless once it only
+// ever goes through formatINR for display, but this value also gets written
+// straight into an <input> as its raw value, where that noise would show.
+function roundMoney(value) {
+  return Math.round(Number(value) * 100) / 100;
+}
+
 // One row of the allocation table: pick an outstanding invoice for this
 // client, then how much of the payment's remaining balance goes to it.
 // Options already picked in other rows are hidden so the same invoice
@@ -43,7 +51,7 @@ function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, onChange, onR
             // actually available for this row) so the common case — pay one
             // invoice in full — needs no typing; still fully editable after.
             const inv = invoices.find((i) => i.invoice_no === invoiceNo);
-            const suggested = inv ? Math.min(Number(inv.balance), maxAmount ?? Number(inv.balance)) : "";
+            const suggested = inv ? roundMoney(Math.min(Number(inv.balance), maxAmount ?? Number(inv.balance))) : "";
             onChange({ ...row, invoiceNo, amount: inv ? String(suggested) : "" });
           }}
           required
@@ -323,9 +331,9 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
                   {rows.map((row, i) => {
                     const selected = outstandingInvoices.find((inv) => inv.invoice_no === row.invoiceNo);
                     const otherRowsTotal = totalAllocated - (Number(row.amount) || 0);
-                    const remainingPaymentForRow = Number(payment.balance) - otherRowsTotal;
+                    const remainingPaymentForRow = roundMoney(Number(payment.balance) - otherRowsTotal);
                     const maxAmount = selected
-                      ? Math.min(Number(selected.balance), remainingPaymentForRow)
+                      ? roundMoney(Math.min(Number(selected.balance), remainingPaymentForRow))
                       : remainingPaymentForRow;
                     return (
                       <AllocationRow
