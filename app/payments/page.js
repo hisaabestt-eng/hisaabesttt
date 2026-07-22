@@ -94,9 +94,6 @@ export default async function PaymentsPage({ searchParams }) {
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Payment Date</th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Amount Received</th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Balance Amount</th>
-              <th className="min-w-[180px] px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
-                Allocated To
-              </th>
               <th className="min-w-[220px] px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                 Remarks
               </th>
@@ -115,7 +112,7 @@ export default async function PaymentsPage({ searchParams }) {
             ))}
             {payments.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={5} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   No payments found.
                 </td>
               </tr>
@@ -127,7 +124,7 @@ export default async function PaymentsPage({ searchParams }) {
                 <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">Total</td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.received)}</td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.balance)}</td>
-                <td colSpan={3}></td>
+                <td colSpan={2}></td>
               </tr>
             </tfoot>
           )}

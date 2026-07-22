@@ -22,11 +22,11 @@ function formatDate(value) {
   });
 }
 
-// Mirrors POSummaryRow/EstimateSummaryRow's click-to-expand pattern: the
-// "Allocated To" column used to list every invoice as its own badge, which
-// didn't leave room to show that invoice's own Paid/Partial Paid/Payment
-// Pending status without cluttering the main table. Collapsed it just names
-// the invoices; expanding shows each one's own status.
+// Mirrors POSummaryRow/EstimateSummaryRow's click-to-expand pattern: which
+// invoices a payment went to, and each one's own Paid/Partial Paid/Payment
+// Pending status, lives entirely behind the expand arrow now instead of its
+// own "Allocated To" column — the collapsed row only shows the payment
+// itself (date, amount, balance, remarks).
 export function PaymentRow({ py, outstandingInvoices, canEdit, canDelete }) {
   const [open, setOpen] = useState(false);
   const allocations = py.allocations || [];
@@ -37,21 +37,16 @@ export function PaymentRow({ py, outstandingInvoices, canEdit, canDelete }) {
         className={allocations.length > 0 ? "cursor-pointer hover:bg-gray-50" : "hover:bg-gray-50"}
         onClick={allocations.length > 0 ? () => setOpen((v) => !v) : undefined}
       >
-        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(py.payment_date)}</td>
+        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+          {allocations.length > 0 && (
+            <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
+          )}
+          {formatDate(py.payment_date)}
+        </td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
           {formatMoney(py.amount_received)}
         </td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(py.balance)}</td>
-        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
-          {allocations.length === 0 ? (
-            <span className="text-gray-400">Not allocated</span>
-          ) : (
-            <span>
-              <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
-              {allocations.map((a) => a.invoice_no).join(", ")}
-            </span>
-          )}
-        </td>
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{py.remarks || "—"}</td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
           <div className="flex gap-2">
@@ -63,7 +58,7 @@ export function PaymentRow({ py, outstandingInvoices, canEdit, canDelete }) {
       </tr>
       {open && (
         <tr>
-          <td colSpan={6} className="bg-gray-50 p-3 dark:bg-gray-900/40">
+          <td colSpan={5} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-900/40">
                 Invoices this payment was allocated to
