@@ -504,12 +504,13 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
   const [submissionDate, setSubmissionDate] = useState(
     invoice.submission_date ? toDateInputValue(invoice.submission_date) : toDateInputValue()
   );
-  // Once Submitted, payment progress is either "In Progress" (still
-  // following up, no date) or "Scheduled" (client gave a date) — before
-  // Submitted this doesn't apply at all, and once real money is allocated
-  // the Progress badge overrides both to Partial Paid/Paid automatically.
+  // Once Submitted, payment progress is "Payment Pending" (submitted, no
+  // active follow-up yet), "In Progress" (actively following up), or
+  // "Scheduled" (client gave a date) — before Submitted this doesn't apply
+  // at all, and once real money is allocated the Progress badge overrides
+  // all three to Partial Paid/Paid automatically.
   const [paymentProgress, setPaymentProgress] = useState(
-    invoice.scheduled_payment_date ? "Scheduled" : "In Progress"
+    invoice.scheduled_payment_date ? "Scheduled" : invoice.payment_pending ? "Payment Pending" : "In Progress"
   );
   const [doc, setDoc] = useState(EMPTY_DOC);
   const [saving, setSaving] = useState(false);
@@ -595,6 +596,7 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
         submissionStatus: statusChoice === "Submitted" ? submitMethod : "Not Submitted",
         submissionDate: statusChoice === "Submitted" ? submissionDate || null : null,
         paymentRejected: statusChoice === "Submitted" && paymentProgress === "Rejected",
+        paymentPending: statusChoice === "Submitted" && paymentProgress === "Payment Pending",
         customStatus: isCustomChoice ? statusChoice : null,
       }),
     });
@@ -720,6 +722,7 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
                           onChange={(e) => setPaymentProgress(e.target.value)}
                           className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                         >
+                          <option value="Payment Pending">Payment Pending</option>
                           <option value="In Progress">In Progress</option>
                           <option value="Scheduled">Scheduled</option>
                           <option value="Rejected">Rejected</option>

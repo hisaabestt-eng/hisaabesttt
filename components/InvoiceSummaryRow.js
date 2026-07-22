@@ -40,9 +40,11 @@ function PaymentProgressCell({ invoice, canEdit }) {
   const editable =
     canEdit &&
     invoice.lifecycle === "Raised" &&
-    (invoice.status === "In Progress" || invoice.status === "Scheduled");
+    (invoice.status === "In Progress" || invoice.status === "Scheduled" || invoice.status === "Payment Pending");
   const [editing, setEditing] = useState(false);
-  const [progressChoice, setProgressChoice] = useState(invoice.status === "Scheduled" ? "Scheduled" : "In Progress");
+  const [progressChoice, setProgressChoice] = useState(
+    invoice.status === "Scheduled" || invoice.status === "Payment Pending" ? invoice.status : "In Progress"
+  );
   const [scheduledDate, setScheduledDate] = useState(
     invoice.scheduled_payment_date ? toDateInputValue(invoice.scheduled_payment_date) : toDateInputValue()
   );
@@ -59,6 +61,7 @@ function PaymentProgressCell({ invoice, canEdit }) {
       body: JSON.stringify({
         scheduledPaymentDate: progressChoice === "Scheduled" ? scheduledDate || null : null,
         rejected: progressChoice === "Rejected",
+        paymentPending: progressChoice === "Payment Pending",
       }),
     });
     const data = await res.json();
@@ -84,6 +87,7 @@ function PaymentProgressCell({ invoice, canEdit }) {
           onChange={(e) => setProgressChoice(e.target.value)}
           className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-1.5 py-1 text-xs"
         >
+          <option value="Payment Pending">Payment Pending</option>
           <option value="In Progress">In Progress</option>
           <option value="Scheduled">Scheduled</option>
           <option value="Rejected">Rejected</option>

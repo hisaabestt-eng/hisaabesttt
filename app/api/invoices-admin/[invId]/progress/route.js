@@ -5,9 +5,9 @@ import { getServerSession } from "@/lib/session";
 
 export async function PATCH(request, { params }) {
   const { invId } = await params;
-  const { scheduledPaymentDate, rejected } = await request.json();
+  const { scheduledPaymentDate, rejected, paymentPending } = await request.json();
   try {
-    await updatePaymentProgress(invId, { scheduledPaymentDate, rejected });
+    await updatePaymentProgress(invId, { scheduledPaymentDate, rejected, paymentPending });
 
     const session = await getServerSession();
     await writeActivity({
