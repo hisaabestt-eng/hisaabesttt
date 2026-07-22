@@ -32,7 +32,7 @@ function roundMoney(value) {
 // client, then how much of the payment's remaining balance goes to it.
 // Options already picked in other rows are hidden so the same invoice
 // can't be allocated twice.
-function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, onChange, onRemove, canRemove }) {
+function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, remainingPayment, onChange, onRemove, canRemove }) {
   const available = invoices.filter(
     (inv) => inv.invoice_no === row.invoiceNo || !usedInvoiceNos.includes(inv.invoice_no)
   );
@@ -51,7 +51,13 @@ function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, onChange, onR
             // actually available for this row) so the common case — pay one
             // invoice in full — needs no typing; still fully editable after.
             const inv = invoices.find((i) => i.invoice_no === invoiceNo);
-            const suggested = inv ? roundMoney(Math.min(Number(inv.balance), maxAmount ?? Number(inv.balance))) : "";
+            // remainingPayment (not maxAmount) on purpose: maxAmount was
+            // computed against the row's *previous* invoice selection and
+            // is one render behind at the moment this fires, which used to
+            // cap the suggestion to the wrong invoice's balance.
+            // remainingPayment doesn't depend on which invoice this row has
+            // selected, so it's always correct here.
+            const suggested = inv ? roundMoney(Math.min(Number(inv.balance), remainingPayment ?? Number(inv.balance))) : "";
             onChange({ ...row, invoiceNo, amount: inv ? String(suggested) : "" });
           }}
           required
@@ -216,10 +222,22 @@ export function AddPaymentButton({ compId, clientId }) {
 
 // Step 2: apply an already-recorded payment's remaining balance to one or
 // more of the client's outstanding invoices.
+// The first row's invoice is pre-selected from outstandingInvoices[0] rather
+// than left blank — matches an invoice to a suggested amount here too,
+// since a pre-selected value never fires the <select>'s own onChange (that
+// only fires when the user actively changes it), so without this the
+// amount would just stay blank for the common one-invoice case.
+function firstRow(outstandingInvoices, paymentBalance) {
+  const inv = outstandingInvoices[0];
+  if (!inv) return { invoiceNo: "", amount: "" };
+  const suggested = roundMoney(Math.min(Number(inv.balance), Number(paymentBalance)));
+  return { invoiceNo: inv.invoice_no, amount: String(suggested) };
+}
+
 export function AllocatePaymentButton({ payment, outstandingInvoices }) {
   const [open, setOpen] = useState(false);
   const [allocationDate, setAllocationDate] = useState(toDateInputValue(payment.payment_date));
-  const [rows, setRows] = useState([{ invoiceNo: outstandingInvoices[0]?.invoice_no || "", amount: "" }]);
+  const [rows, setRows] = useState([firstRow(outstandingInvoices, payment.balance)]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -249,7 +267,7 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
   // carries through automatically the next time this is opened.
   function handleOpen() {
     setAllocationDate(toDateInputValue(payment.payment_date));
-    setRows([{ invoiceNo: outstandingInvoices[0]?.invoice_no || "", amount: "" }]);
+    setRows([firstRow(outstandingInvoices, payment.balance)]);
     setOpen(true);
   }
 
@@ -342,6 +360,7 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
                         invoices={outstandingInvoices}
                         usedInvoiceNos={usedInvoiceNos}
                         maxAmount={maxAmount}
+                        remainingPayment={remainingPaymentForRow}
                         onChange={(next) => updateRow(i, next)}
                         onRemove={() => removeRow(i)}
                         canRemove={rows.length > 1}
