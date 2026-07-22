@@ -396,10 +396,14 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
 export function EditPaymentButton({ payment }) {
   const [open, setOpen] = useState(false);
   const [paymentDate, setPaymentDate] = useState(toDateInputValue(payment.payment_date));
+  const [amountReceived, setAmountReceived] = useState(String(payment.amount_received));
   const [remarks, setRemarks] = useState(payment.remarks || "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const alreadyAllocated = (payment.allocations || []).reduce((sum, a) => sum + Number(a.amount), 0);
+  const belowAllocated = Number(amountReceived) < alreadyAllocated - 0.01;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -408,7 +412,7 @@ export function EditPaymentButton({ payment }) {
     const res = await fetch(`/api/payments-admin/${payment.py_id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paymentDate, remarks }),
+      body: JSON.stringify({ paymentDate, remarks, amountReceived }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -455,6 +459,27 @@ export function EditPaymentButton({ payment }) {
                 />
               </div>
               <div>
+                <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Amount Received</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={amountReceived}
+                  onChange={(e) => setAmountReceived(e.target.value)}
+                  required
+                  className={`w-full rounded-md border px-2 py-1.5 text-sm dark:bg-gray-700 dark:text-gray-100 ${
+                    belowAllocated ? "border-red-400" : "border-gray-300 dark:border-gray-600"
+                  }`}
+                />
+                {alreadyAllocated > 0 && (
+                  <p className={`mt-1 text-xs ${belowAllocated ? "text-red-600" : "text-gray-400"}`}>
+                    {belowAllocated
+                      ? `Can't go below what's already allocated (${formatINR(alreadyAllocated)}).`
+                      : `Already allocated: ${formatINR(alreadyAllocated)}`}
+                  </p>
+                )}
+              </div>
+              <div>
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Remarks (optional)</label>
                 <input
                   type="text"
@@ -476,7 +501,7 @@ export function EditPaymentButton({ payment }) {
                     </div>
                   ))}
                   <p className="mt-2 text-xs text-gray-400">
-                    To change invoices or amounts, delete this payment and record it again.
+                    To change which invoices this went to, delete this payment and record it again.
                   </p>
                 </div>
               )}
@@ -492,7 +517,7 @@ export function EditPaymentButton({ payment }) {
               </button>
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || belowAllocated}
                 className="rounded-full bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Save"}
