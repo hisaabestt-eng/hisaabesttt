@@ -683,7 +683,16 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
                 <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">Status</label>
                 <select
                   value={statusChoice}
-                  onChange={(e) => setStatusChoice(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setStatusChoice(value);
+                    // Freshly submitting (not already Submitted before) should
+                    // default to "nothing's happened yet" rather than implying
+                    // active follow-up already started.
+                    if (value === "Submitted" && statusChoice !== "Submitted") {
+                      setPaymentProgress("Payment Pending");
+                    }
+                  }}
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 >
                   <option value="Raised">Raised</option>
