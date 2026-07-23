@@ -27,7 +27,15 @@ function formatDate(value) {
 // Pending status, lives entirely behind the expand arrow now instead of its
 // own "Allocated To" column — the collapsed row only shows the payment
 // itself (date, amount, balance, remarks).
-export function PaymentRow({ py, outstandingInvoices, canEdit, canDelete }) {
+export function PaymentRow({
+  py,
+  outstandingInvoices,
+  canEdit,
+  canDelete,
+  refining = false,
+  checked = true,
+  onToggle,
+}) {
   const [open, setOpen] = useState(false);
   const allocations = py.allocations || [];
 
@@ -38,6 +46,15 @@ export function PaymentRow({ py, outstandingInvoices, canEdit, canDelete }) {
         onClick={allocations.length > 0 ? () => setOpen((v) => !v) : undefined}
       >
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+          {refining && (
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => onToggle?.(py.py_id)}
+              onClick={(e) => e.stopPropagation()}
+              className="mr-1.5 align-middle"
+            />
+          )}
           {allocations.length > 0 && (
             <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
           )}

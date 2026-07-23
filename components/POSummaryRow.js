@@ -29,7 +29,16 @@ function formatDate(value) {
 // Mirrors InvoiceSummaryRow on the Payment Allocations page: click the PO
 // row to expand and see exactly which invoice(s) were raised against it —
 // so a partially-billed PO's remaining balance is easy to explain at a glance.
-export function POSummaryRow({ po, statusLabels = [], docFileExists, canEdit = true, canDelete = false }) {
+export function POSummaryRow({
+  po,
+  statusLabels = [],
+  docFileExists,
+  canEdit = true,
+  canDelete = false,
+  refining = false,
+  checked = true,
+  onToggle,
+}) {
   const [open, setOpen] = useState(false);
   const invoices = po.invoices || [];
 
@@ -37,6 +46,15 @@ export function POSummaryRow({ po, statusLabels = [], docFileExists, canEdit = t
     <>
       <tr className="cursor-pointer hover:bg-gray-50" onClick={() => setOpen((v) => !v)}>
         <td className="px-3 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
+          {refining && (
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => onToggle?.(po.po_id)}
+              onClick={(e) => e.stopPropagation()}
+              className="mr-1.5 align-middle"
+            />
+          )}
           <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
           {po.record_id}
         </td>

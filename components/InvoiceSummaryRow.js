@@ -158,7 +158,13 @@ function PaymentStatusCell({ payment }) {
 // One invoice = one row (standard outstanding/ageing-report style). Click
 // to expand and see the individual payments that were applied to it,
 // instead of flattening that history into the main list.
-export function InvoiceSummaryRow({ invoice, canEdit = false }) {
+export function InvoiceSummaryRow({
+  invoice,
+  canEdit = false,
+  refining = false,
+  checked = true,
+  onToggle,
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -168,6 +174,15 @@ export function InvoiceSummaryRow({ invoice, canEdit = false }) {
         onClick={() => setOpen((v) => !v)}
       >
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+          {refining && (
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => onToggle?.(invoice.inv_id)}
+              onClick={(e) => e.stopPropagation()}
+              className="mr-1.5 align-middle"
+            />
+          )}
           <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
           {invoice.invoice_no}
         </td>

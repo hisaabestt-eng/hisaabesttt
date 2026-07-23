@@ -9,16 +9,7 @@ import { getPermissions } from "@/lib/permissions";
 import { RECORD_PROGRESS_OPTIONS } from "@/lib/status";
 import { CompanySelect, ClientSelect, SearchBox, ProgressFilter, YearFilter } from "@/components/MainFilterBar";
 import { AddRecordButton } from "@/components/RecordModal";
-import { RecordRow } from "@/components/RecordRow";
-
-function formatMoney(value) {
-  if (value === null || value === undefined) return "—";
-  return Number(value).toLocaleString("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 2,
-  });
-}
+import { RecordsTable } from "@/components/RecordsTable";
 
 export default async function RecordsPage({ searchParams }) {
   const params = await searchParams;
@@ -76,13 +67,6 @@ export default async function RecordsPage({ searchParams }) {
   const canEdit = session.role === "admin" || permissions.can_edit;
   const canDelete = session.role === "admin" || permissions.can_delete;
 
-  // Archived/Cancelled records don't represent real outstanding work, so
-  // they're excluded from the subtotal — same convention as Detailed Invoices.
-  const totalAmount = records.reduce(
-    (sum, record) => (record.lifecycle === "Raised" ? sum + (Number(record.amount) || 0) : sum),
-    0
-  );
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
@@ -107,69 +91,17 @@ export default async function RecordsPage({ searchParams }) {
         )}
       </div>
 
-      <div className="text-sm text-gray-600 dark:text-gray-400">{records.length} records</div>
-
-      <div className="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
-        <table className="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
-          <thead className="sticky top-0 bg-gray-50 dark:bg-gray-900/40">
-            <tr>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Record ID</th>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Date</th>
-              <th className="min-w-[320px] px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
-                Description
-              </th>
-              <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Amount</th>
-              <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {records.map((record) => {
-              const estimate = record.est_id ? allEstimates.find((e) => e.est_id === record.est_id) : null;
-              const po = record.po_id ? allPOs.find((p) => p.po_id === record.po_id) : null;
-              const invoices = po
-                ? allInvoices.filter((inv) => inv.po_no === po.po_no)
-                : estimate
-                  ? allInvoices.filter((inv) => inv.est_id === estimate.est_id)
-                  : [];
-              return (
-                <RecordRow
-                  key={record.record_id}
-                  record={record}
-                  estimate={estimate}
-                  po={po}
-                  invoices={invoices}
-                  statusLabels={statusLabels}
-                  estimateStatusLabels={estimateStatusLabels}
-                  poStatusLabels={poStatusLabels}
-                  canEdit={canEdit}
-                  canDelete={canDelete}
-                />
-              );
-            })}
-            {records.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  No records found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-          {records.length > 0 && (
-            <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
-              <tr>
-                <td colSpan={3} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
-                  Total (Raised only)
-                </td>
-                <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">
-                  {formatMoney(totalAmount)}
-                </td>
-                <td colSpan={2}></td>
-              </tr>
-            </tfoot>
-          )}
-        </table>
-      </div>
+      <RecordsTable
+        records={records}
+        allEstimates={allEstimates}
+        allPOs={allPOs}
+        allInvoices={allInvoices}
+        statusLabels={statusLabels}
+        estimateStatusLabels={estimateStatusLabels}
+        poStatusLabels={poStatusLabels}
+        canEdit={canEdit}
+        canDelete={canDelete}
+      />
     </div>
   );
 }
