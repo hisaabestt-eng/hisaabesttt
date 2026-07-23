@@ -17,11 +17,13 @@ import {
   LIFECYCLE_STYLES,
   CUSTOM_STATUS_STYLE,
 } from "@/lib/status";
+import { parseTags } from "@/lib/tags";
 import { EditRecordButton } from "@/components/RecordModal";
 import { AddEstimateButton, EditEstimateButton, DeleteEstimateButton } from "@/components/EstimateModal";
 import { AddPOButton, EditPOButton, DeletePOButton } from "@/components/POModal";
 import { AddInvoiceButton, EditInvoiceButton, DeleteInvoiceButton } from "@/components/InvoiceModal";
 import { DocumentPreviewLink } from "@/components/DocumentPreview";
+import { EstimateTagsEditor } from "@/components/EstimateTagsEditor";
 
 const NO_FILTER = { search: "", progress: [], year: "", yearType: "calendar" };
 
@@ -227,6 +229,10 @@ export default async function RecordDetailPage({ params }) {
             <div className="mt-3 flex gap-3">
               {canEdit && <EditEstimateButton estimate={estimate} statusLabels={estimateStatusLabels} />}
               {canDelete && !estimate.po_id && <DeleteEstimateButton estId={estimate.est_id} />}
+            </div>
+            <div className="mt-3">
+              <div className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400">Tags</div>
+              <EstimateTagsEditor estId={estimate.est_id} initialTags={parseTags(estimate.tags)} />
             </div>
           </>
         ) : (

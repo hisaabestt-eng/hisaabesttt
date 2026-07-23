@@ -79,6 +79,20 @@ export default function RecordDetailButton({ recordId, description }) {
     router.refresh();
   }
 
+  async function removeTag(tag) {
+    if (!detail?.estimate?.id) return;
+    setSaving(true);
+    const res = await fetch(`/api/estimates/${detail.estimate.id}/tags`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tag }),
+    });
+    const data = await res.json();
+    setDetail((d) => ({ ...d, estimate: { ...d.estimate, tagsList: data.tags } }));
+    setSaving(false);
+    router.refresh();
+  }
+
   const tagsList = detail?.estimate?.tagsList ?? parseTags(detail?.estimate?.tags);
 
   return (
@@ -170,9 +184,18 @@ export default function RecordDetailButton({ recordId, description }) {
                     {tagsList.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:text-gray-300"
+                        className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:text-gray-300"
                       >
                         {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          disabled={saving}
+                          className="text-gray-400 hover:text-red-600 disabled:opacity-50"
+                          aria-label={`Remove tag ${tag}`}
+                        >
+                          ×
+                        </button>
                       </span>
                     ))}
                   </div>

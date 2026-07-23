@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { lifecycleDisplay } from "@/lib/status";
+import { parseTags } from "@/lib/tags";
 import { EditRecordButton, DeleteRecordButton } from "./RecordModal";
 import { EditEstimateButton, DeleteEstimateButton } from "./EstimateModal";
 import { EditPOButton, DeletePOButton } from "./POModal";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
+import { EstimateTagsEditor } from "./EstimateTagsEditor";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -101,6 +103,10 @@ export function RecordRow({
                     <Field label="Estimate No" value={estimate.est_no} />
                     <Field label="Estimate Date" value={formatDate(estimate.estimate_date)} />
                     <Field label="Amount" value={formatMoney(estimate.amount)} />
+                  </div>
+                  <div className="border-t border-gray-100 px-3 py-2.5 dark:border-gray-700">
+                    <div className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400">Tags</div>
+                    <EstimateTagsEditor estId={estimate.est_id} initialTags={parseTags(estimate.tags)} />
                   </div>
 
                   {po ? (

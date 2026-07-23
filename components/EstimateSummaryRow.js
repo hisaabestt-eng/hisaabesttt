@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { lifecycleDisplay } from "@/lib/status";
+import { parseTags } from "@/lib/tags";
 import { EditEstimateButton, DeleteEstimateButton } from "./EstimateModal";
 import { EditPOButton, DeletePOButton } from "./POModal";
 import { DocumentPreviewLink } from "./DocumentPreview";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
+import { EstimateTagsEditor } from "./EstimateTagsEditor";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -103,6 +105,10 @@ export function EstimateSummaryRow({
         <tr>
           <td colSpan={8} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <div className="border-b border-gray-100 px-3 py-2.5 dark:border-gray-700">
+                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Tags</div>
+                <EstimateTagsEditor estId={est.est_id} initialTags={parseTags(est.tags)} />
+              </div>
               {po ? (
                 <>
                   <div className="flex items-center justify-between gap-3 border-b border-gray-100 bg-gray-50/60 px-3 py-2 dark:border-gray-700 dark:bg-gray-900/40">
