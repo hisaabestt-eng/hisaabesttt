@@ -46,7 +46,7 @@ function PaymentProgressCell({ invoice, canEdit }) {
     invoice.status === "Scheduled" || invoice.status === "Payment Pending" ? invoice.status : "In Progress"
   );
   const [scheduledDate, setScheduledDate] = useState(
-    invoice.scheduled_payment_date ? toDateInputValue(invoice.scheduled_payment_date) : toDateInputValue()
+    invoice.scheduled_payment_date ? toDateInputValue(invoice.scheduled_payment_date) : ""
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");

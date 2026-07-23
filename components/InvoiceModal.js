@@ -159,7 +159,7 @@ export function AddInvoiceButton({ pos, estimates = [], compId }) {
   const [poId, setPoId] = useState(pos[0]?.po_id || "");
   const [estId, setEstId] = useState(estimates[0]?.est_id || "");
   const [invoiceNo, setInvoiceNo] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState(toDateInputValue());
+  const [invoiceDate, setInvoiceDate] = useState("");
   const [description, setDescription] = useState(pos[0]?.description || "");
   const [invoiceAmount, setInvoiceAmount] = useState(pos[0]?.balance ?? pos[0]?.amount ?? "");
   const [gstPct, setGstPct] = useState("18");
@@ -491,7 +491,7 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
   const [gstPct, setGstPct] = useState(Number(invoice.gst_percentage) * 100);
   const [tdsPct, setTdsPct] = useState(Number(invoice.tds_percentage) * 100);
   const [scheduledPaymentDate, setScheduledPaymentDate] = useState(
-    invoice.scheduled_payment_date ? toDateInputValue(invoice.scheduled_payment_date) : toDateInputValue()
+    invoice.scheduled_payment_date ? toDateInputValue(invoice.scheduled_payment_date) : ""
   );
   // "Status" collapses lifecycle (Raised/Archived/Cancelled) and submission
   // tracking into one dropdown — Submitted reveals a small inline panel for
@@ -502,7 +502,7 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
       ? invoice.submission_status
       : "Submitted";
   const [submissionDate, setSubmissionDate] = useState(
-    invoice.submission_date ? toDateInputValue(invoice.submission_date) : toDateInputValue()
+    invoice.submission_date ? toDateInputValue(invoice.submission_date) : ""
   );
   // Once Submitted, payment progress is "Payment Pending" (submitted, no
   // active follow-up yet), "In Progress" (actively following up), or

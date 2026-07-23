@@ -110,7 +110,7 @@ function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, remainingPaym
 // that's a separate step (AllocatePaymentButton) once the payment exists.
 export function AddPaymentButton({ compId, clientId }) {
   const [open, setOpen] = useState(false);
-  const [paymentDate, setPaymentDate] = useState(toDateInputValue());
+  const [paymentDate, setPaymentDate] = useState("");
   const [amountReceived, setAmountReceived] = useState("");
   const [remarks, setRemarks] = useState("");
   const [saving, setSaving] = useState(false);

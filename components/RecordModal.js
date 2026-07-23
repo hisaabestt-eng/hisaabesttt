@@ -36,12 +36,12 @@ export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} 
   const [clientId, setClientId] = useState(clients[0]?.client_id || "");
   const [newClientName, setNewClientName] = useState("");
   const [addingClient, setAddingClient] = useState(clients.length === 0);
-  const [recordDate, setRecordDate] = useState(toDateInputValue());
+  const [recordDate, setRecordDate] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [addEstimate, setAddEstimate] = useState(true);
   const [estNo, setEstNo] = useState(suggestedEstNosByClient[clients[0]?.client_id] || "");
-  const [estDate, setEstDate] = useState(toDateInputValue());
+  const [estDate, setEstDate] = useState("");
   const [confirmDuplicate, setConfirmDuplicate] = useState(false);
   const [duplicateAcknowledged, setDuplicateAcknowledged] = useState(false);
   // Once the Record half of a combined save succeeds, hang onto its ID —

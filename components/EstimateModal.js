@@ -25,7 +25,7 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEst
   const [open, setOpen] = useState(false);
   const [recordId, setRecordId] = useState(recordsWithoutEstimate[0]?.record_id || "");
   const [estNo, setEstNo] = useState(suggestionFor(recordsWithoutEstimate[0]?.record_id));
-  const [estDate, setEstDate] = useState(toDateInputValue());
+  const [estDate, setEstDate] = useState("");
   const [description, setDescription] = useState(recordsWithoutEstimate[0]?.description || "");
   const [amount, setAmount] = useState(recordsWithoutEstimate[0]?.amount || "");
   const [doc, setDoc] = useState(EMPTY_DOC);

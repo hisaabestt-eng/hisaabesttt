@@ -18,7 +18,7 @@ export function AddPOButton({ estimatesWithoutPO, compId }) {
   const [open, setOpen] = useState(false);
   const [estId, setEstId] = useState(estimatesWithoutPO[0]?.est_id || "");
   const [poNo, setPoNo] = useState("");
-  const [poDate, setPoDate] = useState(toDateInputValue());
+  const [poDate, setPoDate] = useState("");
   const [description, setDescription] = useState(estimatesWithoutPO[0]?.description || "");
   const [amount, setAmount] = useState(estimatesWithoutPO[0]?.amount || "");
   const [doc, setDoc] = useState(EMPTY_DOC);
