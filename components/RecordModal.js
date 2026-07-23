@@ -108,10 +108,16 @@ export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} 
   // would otherwise carry over into the next unrelated Add Record — silently
   // attaching a new description/amount to that old, abandoned record instead
   // of creating a fresh one. Starting clean on every open avoids that.
+  //
+  // estNo also needs a fresh re-read here rather than just once at mount —
+  // this component doesn't remount between opens, so without this it would
+  // keep showing the suggestion computed when the page first loaded even
+  // after an estimate was just added and the real next number moved on.
   function handleOpen() {
     setError("");
     setCreatedRecordId(null);
     setDuplicateAcknowledged(false);
+    setEstNo(suggestedEstNosByClient[clientId] || "");
     setOpen(true);
   }
 
