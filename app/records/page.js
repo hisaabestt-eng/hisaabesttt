@@ -1,6 +1,6 @@
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
 import { listRecords, getClientsForCompanyPicker, getRecordYears } from "@/lib/recordsAdmin";
-import { listEstimates } from "@/lib/estimatesAdmin";
+import { listEstimates, getSuggestedEstNosByClient } from "@/lib/estimatesAdmin";
 import { listPOs } from "@/lib/poAdmin";
 import { listInvoices } from "@/lib/invoicesAdmin";
 import { getStatusLabels } from "@/lib/settingsAdmin";
@@ -55,6 +55,7 @@ export default async function RecordsPage({ searchParams }) {
     allEstimates,
     allPOs,
     allInvoices,
+    suggestedEstNosByClient,
     session,
     permissions,
   ] = await Promise.all([
@@ -66,6 +67,7 @@ export default async function RecordsPage({ searchParams }) {
     listEstimates({ compId, clientId: "", ...NO_FILTER }),
     listPOs({ compId, clientId: "", ...NO_FILTER }),
     listInvoices({ compId, clientId: "", ...NO_FILTER }),
+    getSuggestedEstNosByClient(compId),
     getServerSession(),
     getPermissions(),
   ]);
@@ -95,7 +97,14 @@ export default async function RecordsPage({ searchParams }) {
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
-        {canAdd && <AddRecordButton key={compId} compId={compId} clients={pickerClients} />}
+        {canAdd && (
+          <AddRecordButton
+            key={compId}
+            compId={compId}
+            clients={pickerClients}
+            suggestedEstNosByClient={suggestedEstNosByClient}
+          />
+        )}
       </div>
 
       <div className="text-sm text-gray-600 dark:text-gray-400">{records.length} records</div>

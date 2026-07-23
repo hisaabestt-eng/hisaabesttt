@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { DateField } from "./DateField";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 // Build the yyyy-mm-dd string from local date parts, not toISOString(),
 // which converts to UTC and can shift the date by a day in IST.
@@ -23,7 +24,13 @@ function toDateOnlyString(value) {
   return toDateInputValue(value);
 }
 
-export function AddRecordButton({ compId, clients }) {
+// A Record and its Estimate almost always share the same description and
+// amount, so entering both separately meant typing the same thing twice —
+// this lets an Estimate (No + Date, on top of the shared fields above) get
+// created right along with the Record in one form. The Record still saves
+// fine on its own with the checkbox off, matching every existing "Estimate
+// Pending" record that has no estimate yet.
+export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} }) {
   const [open, setOpen] = useState(false);
   const [clientList, setClientList] = useState(clients);
   const [clientId, setClientId] = useState(clients[0]?.client_id || "");
@@ -32,10 +39,24 @@ export function AddRecordButton({ compId, clients }) {
   const [recordDate, setRecordDate] = useState(toDateInputValue());
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [addEstimate, setAddEstimate] = useState(true);
+  const [estNo, setEstNo] = useState(suggestedEstNosByClient[clients[0]?.client_id] || "");
+  const [estDate, setEstDate] = useState(toDateInputValue());
+  const [confirmDuplicate, setConfirmDuplicate] = useState(false);
+  const [duplicateAcknowledged, setDuplicateAcknowledged] = useState(false);
+  // Once the Record half of a combined save succeeds, hang onto its ID —
+  // if the Estimate half then fails and the user retries, this lets Save
+  // pick up with just the Estimate instead of creating a second Record.
+  const [createdRecordId, setCreatedRecordId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
   const pathname = usePathname();
+
+  function handleClientChange(id) {
+    setClientId(id);
+    setEstNo(suggestedEstNosByClient[id] || "");
+  }
 
   async function handleAddClient() {
     if (!newClientName.trim()) return;
@@ -52,7 +73,7 @@ export function AddRecordButton({ compId, clients }) {
       return;
     }
     setClientList((list) => [...list, { client_id: data.clientId, client_name: data.clientName }]);
-    setClientId(data.clientId);
+    handleClientChange(data.clientId);
     setNewClientName("");
     setAddingClient(false);
   }
@@ -60,21 +81,85 @@ export function AddRecordButton({ compId, clients }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    setSaving(true);
-    const res = await fetch("/api/records-admin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ compId, clientId, recordDate, description, amount }),
-    });
-    const data = await res.json();
-    setSaving(false);
-    if (!res.ok) {
-      setError(data.error || "Could not save record");
-      return;
+
+    if (addEstimate && !duplicateAcknowledged) {
+      setSaving(true);
+      const checkRes = await fetch(
+        `/api/estimates-admin/check-number?estNo=${encodeURIComponent(estNo)}&compId=${encodeURIComponent(compId)}`
+      );
+      const checkData = await checkRes.json();
+      setSaving(false);
+      if (checkData.exists) {
+        setConfirmDuplicate(true);
+        return;
+      }
     }
+
+    await saveAll();
+  }
+
+  function handleConfirmDuplicate() {
+    setConfirmDuplicate(false);
+    setDuplicateAcknowledged(true);
+    saveAll();
+  }
+
+  // If a previous attempt got the Record saved but the Estimate failed, and
+  // the user then closed the modal instead of retrying, createdRecordId
+  // would otherwise carry over into the next unrelated Add Record — silently
+  // attaching a new description/amount to that old, abandoned record instead
+  // of creating a fresh one. Starting clean on every open avoids that.
+  function handleOpen() {
+    setError("");
+    setCreatedRecordId(null);
+    setDuplicateAcknowledged(false);
+    setOpen(true);
+  }
+
+  async function saveAll() {
+    setSaving(true);
+    setError("");
+
+    let recordId = createdRecordId;
+    if (!recordId) {
+      const res = await fetch("/api/records-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ compId, clientId, recordDate, description, amount }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSaving(false);
+        setError(data.error || "Could not save record");
+        return;
+      }
+      recordId = data.recordId;
+      setCreatedRecordId(recordId);
+    }
+
+    if (addEstimate) {
+      const estRes = await fetch("/api/estimates-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recordId, estNo, estDate, description, amount }),
+      });
+      const estData = await estRes.json();
+      if (!estRes.ok) {
+        setSaving(false);
+        setError(
+          `Record ${recordId} was saved, but the estimate couldn't be: ${estData.error || "unknown error"}. Fix and try Save again, or add the estimate separately later.`
+        );
+        return;
+      }
+    }
+
+    setSaving(false);
     setOpen(false);
     setDescription("");
     setAmount("");
+    setEstNo(suggestedEstNosByClient[clientId] || "");
+    setDuplicateAcknowledged(false);
+    setCreatedRecordId(null);
     // The page's Client filter shows exactly one client at a time — if it
     // isn't already the one this record was just added for, a plain
     // router.refresh() would leave the new record invisible until the user
@@ -89,7 +174,7 @@ export function AddRecordButton({ compId, clients }) {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         className="rounded-full bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
       >
         + Add Record
@@ -116,7 +201,7 @@ export function AddRecordButton({ compId, clients }) {
                   <div className="flex gap-2">
                     <select
                       value={clientId}
-                      onChange={(e) => setClientId(e.target.value)}
+                      onChange={(e) => handleClientChange(e.target.value)}
                       required
                       className="flex-1 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                     >
@@ -202,6 +287,49 @@ export function AddRecordButton({ compId, clients }) {
                   className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
                 />
               </div>
+
+              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={addEstimate}
+                  onChange={(e) => {
+                    setAddEstimate(e.target.checked);
+                    setDuplicateAcknowledged(false);
+                  }}
+                />
+                Add its Estimate too (same description/amount above)
+              </label>
+
+              {addEstimate && (
+                <>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                      Estimate No
+                    </label>
+                    <input
+                      type="text"
+                      value={estNo}
+                      onChange={(e) => {
+                        setEstNo(e.target.value);
+                        setDuplicateAcknowledged(false);
+                      }}
+                      required
+                      className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                      Estimate Date
+                    </label>
+                    <DateField
+                      value={estDate}
+                      onChange={setEstDate}
+                      required
+                      className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
@@ -223,6 +351,13 @@ export function AddRecordButton({ compId, clients }) {
           </form>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDuplicate}
+        message={`Estimate No "${estNo}" has already been used before. Are you sure you want to continue?`}
+        onConfirm={handleConfirmDuplicate}
+        onCancel={() => setConfirmDuplicate(false)}
+      />
     </>
   );
 }
