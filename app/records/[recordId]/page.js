@@ -3,7 +3,7 @@ import path from "path";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRecordById, getRecordsWithoutEstimate } from "@/lib/recordsAdmin";
-import { listEstimates, getSuggestedEstNosByClient } from "@/lib/estimatesAdmin";
+import { listEstimates, getSuggestedEstNo } from "@/lib/estimatesAdmin";
 import { listPOs, getEstimatesWithoutPO } from "@/lib/poAdmin";
 import { listInvoices, getPOsForPicker, getEstimatesForDirectInvoicePicker } from "@/lib/invoicesAdmin";
 import { getStatusLabels } from "@/lib/settingsAdmin";
@@ -131,7 +131,7 @@ export default async function RecordDetailPage({ params }) {
     estimatesWithoutPO,
     posForPicker,
     estimatesForDirectInvoicePicker,
-    suggestedEstNosByClient,
+    suggestedEstNo,
   ] = await Promise.all([
     getServerSession(),
     getPermissions(),
@@ -146,7 +146,7 @@ export default async function RecordDetailPage({ params }) {
     getEstimatesWithoutPO(compId, clientId),
     getPOsForPicker(compId, clientId),
     getEstimatesForDirectInvoicePicker(compId, clientId),
-    getSuggestedEstNosByClient(compId),
+    getSuggestedEstNo(compId),
   ]);
 
   const canAdd = session.role === "admin" || permissions.can_add;
@@ -237,7 +237,7 @@ export default async function RecordDetailPage({ params }) {
                 <AddEstimateButton
                   compId={compId}
                   recordsWithoutEstimate={recordPickerForEstimate}
-                  suggestedEstNosByClient={suggestedEstNosByClient}
+                  suggestedEstNo={suggestedEstNo}
                 />
               </div>
             )}

@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
 import path from "path";
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
-import { listEstimates, getEstimateYears, getSuggestedEstNosByClient } from "@/lib/estimatesAdmin";
+import { listEstimates, getEstimateYears, getSuggestedEstNo } from "@/lib/estimatesAdmin";
 import { getRecordsWithoutEstimate } from "@/lib/recordsAdmin";
 import { listPOs } from "@/lib/poAdmin";
 import { listInvoices } from "@/lib/invoicesAdmin";
@@ -69,7 +69,7 @@ export default async function EstimatesPage({ searchParams }) {
     poStatusLabels,
     allPOs,
     allInvoices,
-    suggestedEstNosByClient,
+    suggestedEstNo,
     session,
     permissions,
   ] = await Promise.all([
@@ -79,7 +79,7 @@ export default async function EstimatesPage({ searchParams }) {
     getStatusLabels("po"),
     listPOs({ compId, clientId: "", ...NO_FILTER }),
     listInvoices({ compId, clientId: "", ...NO_FILTER }),
-    getSuggestedEstNosByClient(compId),
+    getSuggestedEstNo(compId),
     getServerSession(),
     getPermissions(),
   ]);
@@ -112,7 +112,7 @@ export default async function EstimatesPage({ searchParams }) {
             key={`${compId}-${clientId}`}
             compId={compId}
             recordsWithoutEstimate={recordsWithoutEstimate}
-            suggestedEstNosByClient={suggestedEstNosByClient}
+            suggestedEstNo={suggestedEstNo}
           />
         )}
       </div>
