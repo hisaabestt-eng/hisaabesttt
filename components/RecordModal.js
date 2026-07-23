@@ -24,12 +24,12 @@ function toDateOnlyString(value) {
   return toDateInputValue(value);
 }
 
-// A Record and its Estimate almost always share the same description and
-// amount, so entering both separately meant typing the same thing twice —
-// this lets an Estimate (No + Date, on top of the shared fields above) get
-// created right along with the Record in one form. The Record still saves
-// fine on its own with the checkbox off, matching every existing "Estimate
-// Pending" record that has no estimate yet.
+// A Record and its Estimate almost always share the same date, description,
+// and amount, so entering both separately meant typing the same thing
+// twice — this lets an Estimate (just its own No, on top of the shared
+// fields above) get created right along with the Record in one form. The
+// Record still saves fine on its own with the checkbox off, matching every
+// existing "Estimate Pending" record that has no estimate yet.
 export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} }) {
   const [open, setOpen] = useState(false);
   const [clientList, setClientList] = useState(clients);
@@ -41,7 +41,6 @@ export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} 
   const [amount, setAmount] = useState("");
   const [addEstimate, setAddEstimate] = useState(true);
   const [estNo, setEstNo] = useState(suggestedEstNosByClient[clients[0]?.client_id] || "");
-  const [estDate, setEstDate] = useState("");
   const [confirmDuplicate, setConfirmDuplicate] = useState(false);
   const [duplicateAcknowledged, setDuplicateAcknowledged] = useState(false);
   // Once the Record half of a combined save succeeds, hang onto its ID —
@@ -141,7 +140,7 @@ export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} 
       const estRes = await fetch("/api/estimates-admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recordId, estNo, estDate, description, amount }),
+        body: JSON.stringify({ recordId, estNo, estDate: recordDate, description, amount }),
       });
       const estData = await estRes.json();
       if (!estRes.ok) {
@@ -297,38 +296,25 @@ export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} 
                     setDuplicateAcknowledged(false);
                   }}
                 />
-                Add its Estimate too (same description/amount above)
+                Add its Estimate too (same date/description/amount above)
               </label>
 
               {addEstimate && (
-                <>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
-                      Estimate No
-                    </label>
-                    <input
-                      type="text"
-                      value={estNo}
-                      onChange={(e) => {
-                        setEstNo(e.target.value);
-                        setDuplicateAcknowledged(false);
-                      }}
-                      required
-                      className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
-                      Estimate Date
-                    </label>
-                    <DateField
-                      value={estDate}
-                      onChange={setEstDate}
-                      required
-                      className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
-                    />
-                  </div>
-                </>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400">
+                    Estimate No
+                  </label>
+                  <input
+                    type="text"
+                    value={estNo}
+                    onChange={(e) => {
+                      setEstNo(e.target.value);
+                      setDuplicateAcknowledged(false);
+                    }}
+                    required
+                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+                  />
+                </div>
               )}
             </div>
 
