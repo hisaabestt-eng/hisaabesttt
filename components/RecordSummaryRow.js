@@ -28,7 +28,7 @@ function formatDate(value) {
 // progress — the badge above picks a single aggregate status, and this
 // expand-to-drill-down (same pattern as POSummaryRow/InvoiceSummaryRow) is
 // how each invoice's own status stays visible instead of getting hidden.
-export function RecordSummaryRow({ row }) {
+export function RecordSummaryRow({ row, refining = false, checked = true, onToggle }) {
   const [open, setOpen] = useState(false);
   const invoices = row.invoices || [];
   // Only worth expanding when there's more than one invoice to break down —
@@ -41,7 +41,16 @@ export function RecordSummaryRow({ row }) {
         className={expandable ? "cursor-pointer hover:bg-gray-50" : "hover:bg-gray-50"}
         onClick={() => expandable && setOpen((v) => !v)}
       >
-        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+        <td className="whitespace-nowrap px-3 py-3 text-gray-700 dark:text-gray-300">
+          {refining && (
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={() => onToggle?.(row.record_id)}
+              onClick={(e) => e.stopPropagation()}
+              className="mr-1.5 align-middle"
+            />
+          )}
           {expandable && (
             <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
           )}
