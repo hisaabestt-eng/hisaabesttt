@@ -48,7 +48,7 @@ export default async function Home({ searchParams }) {
         <YearFilter years={years} year={rawYear} yearType={yearType} />
       </div>
 
-      <MainTable rows={overview.rows} totalCount={overview.total} search={search} />
+      <MainTable rows={overview.rows} totalCount={overview.total} search={search} progress={progress} />
     </div>
   );
 }

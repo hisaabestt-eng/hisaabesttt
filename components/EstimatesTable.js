@@ -1,7 +1,7 @@
 "use client";
 
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
-import { narrowInvoicesToSearch } from "@/lib/searchNarrow";
+import { narrowInvoicesToSearch, narrowInvoicesToProgress } from "@/lib/searchNarrow";
 import { EstimateSummaryRow } from "./EstimateSummaryRow";
 
 function formatMoney(value) {
@@ -25,6 +25,7 @@ export function EstimatesTable({
   canEdit,
   canDelete,
   search,
+  progress,
 }) {
   const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
     estimates,
@@ -67,11 +68,14 @@ export function EstimatesTable({
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
             {visibleRows.map((est) => {
               const po = est.po_id ? allPOs.find((p) => p.po_id === est.po_id) : null;
-              const invoices = narrowInvoicesToSearch(
-                po
-                  ? allInvoices.filter((inv) => inv.po_no === po.po_no)
-                  : allInvoices.filter((inv) => inv.est_id === est.est_id),
-                search
+              const invoices = narrowInvoicesToProgress(
+                narrowInvoicesToSearch(
+                  po
+                    ? allInvoices.filter((inv) => inv.po_no === po.po_no)
+                    : allInvoices.filter((inv) => inv.est_id === est.est_id),
+                  search
+                ),
+                progress
               );
               return (
                 <EstimateSummaryRow

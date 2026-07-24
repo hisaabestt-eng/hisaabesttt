@@ -117,6 +117,7 @@ export default async function EstimatesPage({ searchParams }) {
         canEdit={canEdit}
         canDelete={canDelete}
         search={search}
+        progress={progress}
       />
     </div>
   );

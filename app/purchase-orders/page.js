@@ -89,6 +89,7 @@ export default async function PurchaseOrdersPage({ searchParams }) {
         canEdit={canEdit}
         canDelete={canDelete}
         search={search}
+        progress={progress}
       />
     </div>
   );
