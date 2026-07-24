@@ -1,6 +1,7 @@
 "use client";
 
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
+import { narrowInvoicesToSearch } from "@/lib/searchNarrow";
 import { POSummaryRow } from "./POSummaryRow";
 
 function formatMoney(value) {
@@ -14,7 +15,7 @@ function formatMoney(value) {
 
 // docFileExists is resolved server-side per PO (needs Node's fs, not
 // available here) and passed in already computed, as po.docFileExists.
-export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete }) {
+export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, search }) {
   const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
     purchaseOrders,
     (po) => po.po_id
@@ -67,7 +68,7 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete }) {
             {visibleRows.map((po) => (
               <POSummaryRow
                 key={po.po_id}
-                po={po}
+                po={{ ...po, invoices: narrowInvoicesToSearch(po.invoices, search) }}
                 statusLabels={statusLabels}
                 docFileExists={po.docFileExists}
                 canEdit={canEdit}

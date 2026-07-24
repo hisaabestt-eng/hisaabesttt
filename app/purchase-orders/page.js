@@ -88,6 +88,7 @@ export default async function PurchaseOrdersPage({ searchParams }) {
         statusLabels={statusLabels}
         canEdit={canEdit}
         canDelete={canDelete}
+        search={search}
       />
     </div>
   );

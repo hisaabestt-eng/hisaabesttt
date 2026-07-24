@@ -1,6 +1,7 @@
 "use client";
 
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
+import { narrowInvoicesToSearch } from "@/lib/searchNarrow";
 import { RecordRow } from "./RecordRow";
 
 function formatMoney(value) {
@@ -22,6 +23,7 @@ export function RecordsTable({
   poStatusLabels,
   canEdit,
   canDelete,
+  search,
 }) {
   const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
     records,
@@ -67,11 +69,14 @@ export function RecordsTable({
             {visibleRows.map((record) => {
               const estimate = record.est_id ? allEstimates.find((e) => e.est_id === record.est_id) : null;
               const po = record.po_id ? allPOs.find((p) => p.po_id === record.po_id) : null;
-              const invoices = po
-                ? allInvoices.filter((inv) => inv.po_no === po.po_no)
-                : estimate
-                  ? allInvoices.filter((inv) => inv.est_id === estimate.est_id)
-                  : [];
+              const invoices = narrowInvoicesToSearch(
+                po
+                  ? allInvoices.filter((inv) => inv.po_no === po.po_no)
+                  : estimate
+                    ? allInvoices.filter((inv) => inv.est_id === estimate.est_id)
+                    : [],
+                search
+              );
               return (
                 <RecordRow
                   key={record.record_id}

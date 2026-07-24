@@ -116,6 +116,7 @@ export default async function EstimatesPage({ searchParams }) {
         poStatusLabels={poStatusLabels}
         canEdit={canEdit}
         canDelete={canDelete}
+        search={search}
       />
     </div>
   );

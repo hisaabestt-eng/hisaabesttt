@@ -101,6 +101,7 @@ export default async function RecordsPage({ searchParams }) {
         poStatusLabels={poStatusLabels}
         canEdit={canEdit}
         canDelete={canDelete}
+        search={search}
       />
     </div>
   );

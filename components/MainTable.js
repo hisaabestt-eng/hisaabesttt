@@ -1,6 +1,7 @@
 "use client";
 
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
+import { narrowInvoicesToSearch } from "@/lib/searchNarrow";
 import { RecordSummaryRow } from "./RecordSummaryRow";
 
 function formatMoney(value) {
@@ -12,7 +13,7 @@ function formatMoney(value) {
   });
 }
 
-export function MainTable({ rows, totalCount }) {
+export function MainTable({ rows, totalCount, search }) {
   const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
     rows,
     (row) => row.record_id
@@ -50,7 +51,7 @@ export function MainTable({ rows, totalCount }) {
             {visibleRows.map((row) => (
               <RecordSummaryRow
                 key={row.record_id}
-                row={row}
+                row={{ ...row, invoices: narrowInvoicesToSearch(row.invoices, search) }}
                 refining={refining}
                 checked={isChecked(row.record_id)}
                 onToggle={toggleRow}
