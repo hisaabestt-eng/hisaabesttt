@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { STATUS_STYLES } from "@/lib/status";
+import { STATUS_STYLES, progressLabel, progressStyle } from "@/lib/status";
 import RecordDetailButton from "./RecordDetailModal";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 
@@ -65,17 +65,29 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
             <span className="inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full bg-gray-400 px-2.5 py-1 text-xs font-semibold text-white">
               {invoices.length} invoices
             </span>
-          ) : (
+          ) : invoices.length === 1 ? (
+            // A search/progress filter can narrow a multi-invoice group down
+            // to just one — row.status is the aggregate computed over the
+            // *original* full group, so once only one invoice remains here,
+            // its own progress is what should show, not the stale aggregate.
             <>
               <span
-                className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[row.status]}`}
+                className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${progressStyle(invoices[0])}`}
               >
-                {row.status}
+                {progressLabel(invoices[0], "Invoice")}
               </span>
-              {row.status === "Scheduled" && row.scheduled_payment_date && (
-                <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{formatDate(row.scheduled_payment_date)}</div>
+              {invoices[0].status === "Scheduled" && invoices[0].scheduled_payment_date && (
+                <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                  {formatDate(invoices[0].scheduled_payment_date)}
+                </div>
               )}
             </>
+          ) : (
+            <span
+              className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[row.status]}`}
+            >
+              {row.status}
+            </span>
           )}
         </td>
       </tr>
