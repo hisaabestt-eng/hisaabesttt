@@ -9,7 +9,14 @@ import { getStatusLabels } from "@/lib/settingsAdmin";
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
 import { ESTIMATE_PROGRESS_OPTIONS } from "@/lib/status";
-import { CompanySelect, ClientSelect, SearchBox, ProgressFilter, YearFilter } from "@/components/MainFilterBar";
+import {
+  CompanySelect,
+  ClientSelect,
+  SearchBox,
+  ProgressFilter,
+  YearFilter,
+  ClearFiltersButton,
+} from "@/components/MainFilterBar";
 import { AddEstimateButton } from "@/components/EstimateModal";
 import { EstimatesTable } from "@/components/EstimatesTable";
 
@@ -93,11 +100,12 @@ export default async function EstimatesPage({ searchParams }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-0 flex-1">
-          <SearchBox search={search} />
+          <SearchBox key={search} search={search} />
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <ClearFiltersButton />
         {canAdd && (
           <AddEstimateButton
             key={`${compId}-${clientId}`}

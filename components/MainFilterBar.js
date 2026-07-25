@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 
 export function CompanySelect({ companies, compId }) {
@@ -209,6 +209,41 @@ export function ProgressFilter({ options, selected }) {
         </div>
       )}
     </div>
+  );
+}
+
+// Clears every filter param at once (search, progress, year, yearType,
+// lifecycle) in one click instead of having to untick/reset each filter
+// individually — mirrors the "Refine list" toggle's own "Done refining"
+// button, just for the search/filter bar instead of row selection.
+// Company/Client are deliberately left alone — those pick *which* business
+// context is being looked at, not a filter within it, same reasoning
+// CompanySelect/ClientSelect already apply when they preserve each other.
+const FILTER_PARAM_KEYS = ["search", "progress", "year", "yearType", "lifecycle"];
+
+export function ClearFiltersButton() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const hasActiveFilter = FILTER_PARAM_KEYS.some((key) => searchParams.get(key));
+  if (!hasActiveFilter) return null;
+
+  function handleClear() {
+    const params = new URLSearchParams(window.location.search);
+    FILTER_PARAM_KEYS.forEach((key) => params.delete(key));
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClear}
+      className="rounded-full border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+    >
+      Clear filters
+    </button>
   );
 }
 

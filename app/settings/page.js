@@ -219,7 +219,7 @@ export default async function SettingsPage({ searchParams }) {
 
           <div className="flex flex-wrap items-center gap-2">
             <div className="min-w-0 flex-1">
-              <SearchBox search={search} />
+              <SearchBox key={search} search={search} />
             </div>
             <AddClientButton key={compId} compId={compId} />
           </div>

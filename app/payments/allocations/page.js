@@ -4,7 +4,14 @@ import { getInvoiceYears } from "@/lib/invoicesAdmin";
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
 import { INVOICE_PROGRESS_OPTIONS } from "@/lib/status";
-import { CompanySelect, ClientSelect, SearchBox, ProgressFilter, YearFilter } from "@/components/MainFilterBar";
+import {
+  CompanySelect,
+  ClientSelect,
+  SearchBox,
+  ProgressFilter,
+  YearFilter,
+  ClearFiltersButton,
+} from "@/components/MainFilterBar";
 import { PaymentAllocationsTable } from "@/components/PaymentAllocationsTable";
 
 export default async function PaymentAllocationsPage({ searchParams }) {
@@ -48,11 +55,12 @@ export default async function PaymentAllocationsPage({ searchParams }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-0 flex-1">
-          <SearchBox search={search} />
+          <SearchBox key={search} search={search} />
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={INVOICE_PROGRESS_OPTIONS} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <ClearFiltersButton />
       </div>
 
       <PaymentAllocationsTable invoices={invoices} canEdit={canEdit} />

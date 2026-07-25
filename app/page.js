@@ -1,7 +1,14 @@
 import { getCompanies, getClients, getDefaultCompany, getRecordsOverview } from "@/lib/records";
 import { getEstimateYears } from "@/lib/estimatesAdmin";
 import { MAIN_PROGRESS_OPTIONS } from "@/lib/status";
-import { CompanySelect, ClientSelect, SearchBox, ProgressFilter, YearFilter } from "@/components/MainFilterBar";
+import {
+  CompanySelect,
+  ClientSelect,
+  SearchBox,
+  ProgressFilter,
+  YearFilter,
+  ClearFiltersButton,
+} from "@/components/MainFilterBar";
 import { MainTable } from "@/components/MainTable";
 
 export default async function Home({ searchParams }) {
@@ -41,11 +48,12 @@ export default async function Home({ searchParams }) {
 
       <div className="flex flex-wrap gap-2">
         <div className="min-w-0 flex-1">
-          <SearchBox search={search} />
+          <SearchBox key={search} search={search} />
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={MAIN_PROGRESS_OPTIONS} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <ClearFiltersButton />
       </div>
 
       <MainTable rows={overview.rows} totalCount={overview.total} search={search} progress={progress} />

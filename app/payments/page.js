@@ -2,7 +2,7 @@ import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
 import { listPayments, getOutstandingInvoices, getPaymentYears } from "@/lib/paymentsAdmin";
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
-import { CompanySelect, ClientSelect, SearchBox, YearFilter } from "@/components/MainFilterBar";
+import { CompanySelect, ClientSelect, SearchBox, YearFilter, ClearFiltersButton } from "@/components/MainFilterBar";
 import { AddPaymentButton } from "@/components/PaymentModal";
 import { PaymentsTable } from "@/components/PaymentsTable";
 
@@ -49,10 +49,11 @@ export default async function PaymentsPage({ searchParams }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-0 flex-1">
-          <SearchBox search={search} />
+          <SearchBox key={search} search={search} />
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <ClearFiltersButton />
         {canAdd && (
           <AddPaymentButton key={`${compId}-${clientId}`} compId={compId} clientId={clientId} />
         )}

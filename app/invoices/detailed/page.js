@@ -6,6 +6,7 @@ import {
   SearchBox,
   YearFilter,
   LifecycleFilter,
+  ClearFiltersButton,
 } from "@/components/MainFilterBar";
 import { DetailedInvoicesTable } from "@/components/DetailedInvoicesTable";
 
@@ -40,11 +41,12 @@ export default async function DetailedInvoicesPage({ searchParams }) {
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-0 flex-1">
-          <SearchBox search={search} />
+          <SearchBox key={search} search={search} />
         </div>
         <ClientSelect clients={[{ client_id: "", client_name: "All clients", comp_id: compId }, ...clients]} compId={compId} clientId={clientId} />
         <LifecycleFilter lifecycle={lifecycle} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <ClearFiltersButton />
       </div>
 
       <DetailedInvoicesTable invoices={invoices} clientId={clientId} />
