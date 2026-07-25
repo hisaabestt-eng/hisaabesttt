@@ -96,6 +96,13 @@ export function MainTable({ rows, totalCount, search, progress }) {
       clone.style.maxHeight = "none";
       clone.style.overflow = "visible";
       clone.querySelectorAll(".sticky").forEach((el) => el.classList.remove("sticky", "top-0", "bottom-0"));
+      // html2canvas-pro mis-renders a dotted underline as a strike-through
+      // the middle of the text — that underline is only a "this is
+      // clickable" hint anyway, meaningless in a static image, so drop it.
+      clone.querySelectorAll(".underline").forEach((el) => {
+        el.classList.remove("underline", "decoration-dotted");
+        el.style.textDecoration = "none";
+      });
       document.body.appendChild(clone);
       const canvas = await html2canvas(clone, { backgroundColor: "#ffffff", scale: 2 });
       document.body.removeChild(clone);
