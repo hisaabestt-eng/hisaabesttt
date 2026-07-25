@@ -125,12 +125,14 @@ export function YearFilter({ years, year, yearType, from, to }) {
           <DateField
             value={from || ""}
             onChange={(v) => updateDateParam("from", v)}
+            showPicker
             className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
           />
           <span className="text-sm text-gray-400">to</span>
           <DateField
             value={to || ""}
             onChange={(v) => updateDateParam("to", v)}
+            showPicker
             className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
           />
         </div>
