@@ -5,7 +5,6 @@ import {
   ClientSelect,
   SearchBox,
   YearFilter,
-  DateRangeFilter,
   LifecycleFilter,
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
@@ -14,7 +13,7 @@ import { DetailedInvoicesTable } from "@/components/DetailedInvoicesTable";
 export default async function DetailedInvoicesPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
-  const yearType = params?.yearType === "fy" ? "fy" : "calendar";
+  const yearType = params?.yearType === "fy" ? "fy" : params?.yearType === "custom" ? "custom" : "calendar";
   const lifecycle = params?.lifecycle || "";
   const from = params?.from || "";
   const to = params?.to || "";
@@ -48,8 +47,7 @@ export default async function DetailedInvoicesPage({ searchParams }) {
         </div>
         <ClientSelect clients={[{ client_id: "", client_name: "All clients", comp_id: compId }, ...clients]} compId={compId} clientId={clientId} />
         <LifecycleFilter lifecycle={lifecycle} />
-        <YearFilter years={years} year={rawYear} yearType={yearType} />
-        <DateRangeFilter from={from} to={to} />
+        <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
         <ClearFiltersButton />
       </div>
 

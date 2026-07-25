@@ -18,7 +18,6 @@ import {
   SearchBox,
   ProgressFilter,
   YearFilter,
-  DateRangeFilter,
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
 import { AddInvoiceButton } from "@/components/InvoiceModal";
@@ -40,7 +39,7 @@ export default async function InvoicesPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
-  const yearType = params?.yearType === "fy" ? "fy" : "calendar";
+  const yearType = params?.yearType === "fy" ? "fy" : params?.yearType === "custom" ? "custom" : "calendar";
   const from = params?.from || "";
   const to = params?.to || "";
 
@@ -103,8 +102,7 @@ export default async function InvoicesPage({ searchParams }) {
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
-        <YearFilter years={years} year={rawYear} yearType={yearType} />
-        <DateRangeFilter from={from} to={to} />
+        <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
         <ClearFiltersButton />
         {canAdd && (
           <AddInvoiceButton

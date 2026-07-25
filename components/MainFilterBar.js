@@ -65,16 +65,28 @@ export function ClientSelect({ clients, compId, clientId }) {
   );
 }
 
-// Calendar-year or financial-year (Apr–Mar) filter, used by the Detailed
-// Invoices report so GST/TDS can be reviewed one tax period at a time.
-export function YearFilter({ years, year, yearType }) {
+// Calendar-year, financial-year (Apr–Mar), or a custom day-level range —
+// picking "Custom Date" swaps the Year dropdown out for two date inputs
+// instead of sitting alongside it as a separate always-visible control.
+// A custom range takes priority over Year on the server side (see
+// applyDateRangeFilter in lib/dates.js) whenever both are somehow set.
+export function YearFilter({ years, year, yearType, from, to }) {
   const router = useRouter();
   const pathname = usePathname();
-  const effectiveType = yearType === "fy" ? "fy" : "calendar";
+  const effectiveType = yearType === "fy" ? "fy" : yearType === "custom" ? "custom" : "calendar";
 
   function handleTypeChange(e) {
     const params = new URLSearchParams(window.location.search);
     params.set("yearType", e.target.value);
+    // Switching between "a whole year" and "a custom range" makes the other
+    // one's params meaningless — drop them so a stale value can't linger
+    // and silently narrow the range once the user switches back.
+    if (e.target.value === "custom") {
+      params.delete("year");
+    } else {
+      params.delete("from");
+      params.delete("to");
+    }
     params.delete("page");
     router.push(`${pathname}?${params.toString()}`);
   }
@@ -89,6 +101,14 @@ export function YearFilter({ years, year, yearType }) {
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  function updateDateParam(key, value) {
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set(key, value);
+    else params.delete(key);
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
   return (
     <div className="flex items-center gap-2">
       <select
@@ -98,51 +118,36 @@ export function YearFilter({ years, year, yearType }) {
       >
         <option value="calendar">Calendar Year</option>
         <option value="fy">Financial Year (Apr–Mar)</option>
+        <option value="custom">Custom Date</option>
       </select>
-      <select
-        value={year || "all"}
-        onChange={handleYearChange}
-        className="rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
-      >
-        <option value="all">All years</option>
-        {years.map((y) => (
-          <option key={y} value={y}>
-            {effectiveType === "fy" ? `FY ${y}-${String(y + 1).slice(-2)}` : y}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-// A custom day-level range, separate from (and taking priority over, on the
-// server side) the whole-year YearFilter above — for when "just 2026" isn't
-// precise enough. Either end can be left blank for an open-ended range.
-export function DateRangeFilter({ from, to }) {
-  const router = useRouter();
-  const pathname = usePathname();
-
-  function updateParam(key, value) {
-    const params = new URLSearchParams(window.location.search);
-    if (value) params.set(key, value);
-    else params.delete(key);
-    params.delete("page");
-    router.push(`${pathname}?${params.toString()}`);
-  }
-
-  return (
-    <div className="flex items-center gap-1.5">
-      <DateField
-        value={from || ""}
-        onChange={(v) => updateParam("from", v)}
-        className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
-      />
-      <span className="text-sm text-gray-400">to</span>
-      <DateField
-        value={to || ""}
-        onChange={(v) => updateParam("to", v)}
-        className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
-      />
+      {effectiveType === "custom" ? (
+        <div className="flex items-center gap-1.5">
+          <DateField
+            value={from || ""}
+            onChange={(v) => updateDateParam("from", v)}
+            className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+          />
+          <span className="text-sm text-gray-400">to</span>
+          <DateField
+            value={to || ""}
+            onChange={(v) => updateDateParam("to", v)}
+            className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+          />
+        </div>
+      ) : (
+        <select
+          value={year || "all"}
+          onChange={handleYearChange}
+          className="rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+        >
+          <option value="all">All years</option>
+          {years.map((y) => (
+            <option key={y} value={y}>
+              {effectiveType === "fy" ? `FY ${y}-${String(y + 1).slice(-2)}` : y}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }
