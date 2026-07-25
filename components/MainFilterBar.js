@@ -219,7 +219,7 @@ export function ProgressFilter({ options, selected }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2.5 py-1.5 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600"
+        className="min-w-[140px] rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600"
       >
         Progress{selected.length > 0 ? ` (${selected.length})` : ""}
       </button>
