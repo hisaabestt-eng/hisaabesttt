@@ -65,6 +65,7 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
               <th className="min-w-[320px] px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                 Description
               </th>
+              <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Invoice Amount</th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Total</th>
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Document</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
@@ -89,6 +90,9 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                 <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{inv.invoice_no}</td>
                 <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(inv.invoice_date)}</td>
                 <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{inv.description}</td>
+                <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
+                  {formatMoney(inv.invoice_amount)}
+                </td>
                 <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
                   {formatMoney(inv.invoice_total)}
                 </td>
@@ -155,7 +159,7 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
             ))}
             {visibleRows.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={10} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   {invoices.length === 0 ? "No invoices found." : "All rows refined out — untick some to bring them back."}
                 </td>
               </tr>
@@ -167,6 +171,7 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                 <td colSpan={4} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
                   Total (Raised only)
                 </td>
+                <td></td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totalAmount)}</td>
                 <td colSpan={4}></td>
               </tr>
