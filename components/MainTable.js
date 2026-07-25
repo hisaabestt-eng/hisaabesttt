@@ -74,8 +74,8 @@ export function MainTable({ rows, totalCount, search, progress }) {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Main Page");
       XLSX.writeFile(wb, `main-page-${Date.now()}.xlsx`);
-    } catch {
-      setExportError("Could not export.");
+    } catch (e) {
+      setExportError(`Could not export: ${e?.message || e}`);
     }
     setExporting(false);
   }
@@ -103,8 +103,8 @@ export function MainTable({ rows, totalCount, search, progress }) {
       link.download = `main-page-${Date.now()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-    } catch {
-      setExportError("Could not create screenshot.");
+    } catch (e) {
+      setExportError(`Could not create screenshot: ${e?.message || e}`);
     }
     setCapturing(false);
   }
