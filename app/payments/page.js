@@ -1,15 +1,30 @@
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
-import { listPayments, getOutstandingInvoices, getPaymentYears } from "@/lib/paymentsAdmin";
+import { listPayments, getOutstandingInvoices, getPaymentYears, listInvoiceSummaries } from "@/lib/paymentsAdmin";
+import { getInvoiceYears } from "@/lib/invoicesAdmin";
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
-import { CompanySelect, ClientSelect, SearchBox, YearFilter, ClearFiltersButton } from "@/components/MainFilterBar";
+import { INVOICE_PROGRESS_OPTIONS } from "@/lib/status";
+import {
+  CompanySelect,
+  ClientSelect,
+  SearchBox,
+  ProgressFilter,
+  YearFilter,
+  ClearFiltersButton,
+} from "@/components/MainFilterBar";
 import { AddPaymentButton } from "@/components/PaymentModal";
 import { PaymentsTable } from "@/components/PaymentsTable";
+import { PaymentAllocationsTable } from "@/components/PaymentAllocationsTable";
+import { PaymentsTabs } from "@/components/PaymentsTabs";
+
+const TAB_KEYS = ["payments", "allocations"];
 
 export default async function PaymentsPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
+  const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
+  const tab = TAB_KEYS.includes(params?.tab) ? params.tab : "payments";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -21,18 +36,18 @@ export default async function PaymentsPage({ searchParams }) {
   )?.client_id;
   const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
-  const years = await getPaymentYears(compId);
-  // Defaulting to the current year hides everything for a company whose
-  // data is all from a past year — only do it when the current year
-  // actually has data; otherwise show everything (matches what the Year
-  // dropdown displays when nothing has been explicitly chosen).
+  // Each tab has its own underlying data (payments vs. invoices), so its own
+  // list of years with data — used for both the Year dropdown itself and the
+  // "does the current year actually have data" default-year check below.
+  const years = await (tab === "allocations" ? getInvoiceYears(compId) : getPaymentYears(compId));
   const currentYear = new Date().getFullYear();
   const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
   const year = rawYear === "all" ? "" : rawYear;
 
-  const [payments, outstandingInvoices, session, permissions] = await Promise.all([
+  const [payments, outstandingInvoices, invoices, session, permissions] = await Promise.all([
     listPayments({ compId, clientId, search, year, yearType }),
     getOutstandingInvoices(compId, clientId),
+    listInvoiceSummaries({ compId, clientId, search, progress, year, yearType }),
     getServerSession(),
     getPermissions(),
   ]);
@@ -47,24 +62,31 @@ export default async function PaymentsPage({ searchParams }) {
         <CompanySelect companies={companies} compId={compId} />
       </div>
 
+      <PaymentsTabs active={tab} />
+
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-0 flex-1">
           <SearchBox key={search} search={search} />
         </div>
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
+        {tab === "allocations" && <ProgressFilter options={INVOICE_PROGRESS_OPTIONS} selected={progress} />}
         <YearFilter years={years} year={rawYear} yearType={yearType} />
         <ClearFiltersButton />
-        {canAdd && (
+        {tab === "payments" && canAdd && (
           <AddPaymentButton key={`${compId}-${clientId}`} compId={compId} clientId={clientId} />
         )}
       </div>
 
-      <PaymentsTable
-        payments={payments}
-        outstandingInvoices={outstandingInvoices}
-        canEdit={canEdit}
-        canDelete={canDelete}
-      />
+      {tab === "payments" ? (
+        <PaymentsTable
+          payments={payments}
+          outstandingInvoices={outstandingInvoices}
+          canEdit={canEdit}
+          canDelete={canDelete}
+        />
+      ) : (
+        <PaymentAllocationsTable invoices={invoices} canEdit={canEdit} />
+      )}
     </div>
   );
 }

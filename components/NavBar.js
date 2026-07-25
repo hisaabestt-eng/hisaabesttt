@@ -12,18 +12,16 @@ const BASE_LINKS = [
   { href: "/purchase-orders", label: "Purchase Orders" },
   { href: "/invoices", label: "Invoices" },
   { href: "/payments", label: "Payments" },
-  { href: "/payments/allocations", label: "Payment Allocations" },
 ];
 
 // Settings holds company/client management and the permissions toggle
 // itself, so it's only shown (and only reachable — see proxy.js) for admins.
 const ADMIN_LINKS = [{ href: "/settings", label: "Settings" }];
 
-// Several routes share a URL prefix (e.g. "/payments" and
-// "/payments/allocations" are siblings, not parent-child), so the active
-// link can't just be "does pathname start with this href" — that would
-// light up both at once. Instead pick whichever link is the longest
-// matching prefix, so only the most specific one wins.
+// A nav link should also light up on its own nested/dynamic routes (e.g.
+// "/records/RC-0001" should highlight "Records"), so this matches on prefix
+// rather than exact pathname — picking the longest matching prefix in case
+// two links' hrefs are ever themselves nested inside one another.
 function findActiveHref(pathname, links) {
   const matches = links.filter(
     (link) => link.href === "/" ? pathname === "/" : pathname === link.href || pathname.startsWith(`${link.href}/`)
