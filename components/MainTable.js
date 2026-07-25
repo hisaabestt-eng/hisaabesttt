@@ -85,7 +85,7 @@ export function MainTable({ rows, totalCount, search, progress }) {
     if (!tableWrapperRef.current) return;
     setCapturing(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
+      const html2canvas = (await import("html2canvas-pro")).default;
       // Clone the table out of the scrollable/sticky wrapper so the capture
       // includes every row (not just what's currently scrolled into view).
       const clone = tableWrapperRef.current.cloneNode(true);
