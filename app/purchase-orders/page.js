@@ -80,17 +80,19 @@ export default async function PurchaseOrdersPage({ searchParams }) {
         <CompanySelect companies={companies} compId={compId} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <SearchBox key={search} search={search} />
+      <div className="flex flex-col gap-3">
+        <SearchBox key={search} search={search} />
+        <div className="flex flex-wrap items-center gap-3">
+          <ClientSelect clients={clients} compId={compId} clientId={clientId} />
+          <ProgressFilter options={progressOptions} selected={progress} />
+          <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
+          <ClearFiltersButton />
+          {canAdd && (
+            <div className="ml-auto">
+              <AddPOButton key={`${compId}-${clientId}`} compId={compId} estimatesWithoutPO={estimatesWithoutPO} />
+            </div>
+          )}
         </div>
-        <ClientSelect clients={clients} compId={compId} clientId={clientId} />
-        <ProgressFilter options={progressOptions} selected={progress} />
-        <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
-        <ClearFiltersButton />
-        {canAdd && (
-          <AddPOButton key={`${compId}-${clientId}`} compId={compId} estimatesWithoutPO={estimatesWithoutPO} />
-        )}
       </div>
 
       <POsTable

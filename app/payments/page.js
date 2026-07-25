@@ -66,17 +66,19 @@ export default async function PaymentsPage({ searchParams }) {
 
       <PaymentsTabs active={tab} />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <SearchBox key={search} search={search} />
+      <div className="flex flex-col gap-3">
+        <SearchBox key={search} search={search} />
+        <div className="flex flex-wrap items-center gap-3">
+          <ClientSelect clients={clients} compId={compId} clientId={clientId} />
+          {tab === "allocations" && <ProgressFilter options={INVOICE_PROGRESS_OPTIONS} selected={progress} />}
+          <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
+          <ClearFiltersButton />
+          {tab === "payments" && canAdd && (
+            <div className="ml-auto">
+              <AddPaymentButton key={`${compId}-${clientId}`} compId={compId} clientId={clientId} />
+            </div>
+          )}
         </div>
-        <ClientSelect clients={clients} compId={compId} clientId={clientId} />
-        {tab === "allocations" && <ProgressFilter options={INVOICE_PROGRESS_OPTIONS} selected={progress} />}
-        <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
-        <ClearFiltersButton />
-        {tab === "payments" && canAdd && (
-          <AddPaymentButton key={`${compId}-${clientId}`} compId={compId} clientId={clientId} />
-        )}
       </div>
 
       {tab === "payments" ? (

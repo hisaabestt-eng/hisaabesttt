@@ -41,14 +41,14 @@ export default async function DetailedInvoicesPage({ searchParams }) {
         <CompanySelect companies={companies} compId={compId} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="min-w-0 flex-1">
-          <SearchBox key={search} search={search} />
+      <div className="flex flex-col gap-3">
+        <SearchBox key={search} search={search} />
+        <div className="flex flex-wrap items-center gap-3">
+          <ClientSelect clients={[{ client_id: "", client_name: "All clients", comp_id: compId }, ...clients]} compId={compId} clientId={clientId} />
+          <LifecycleFilter lifecycle={lifecycle} />
+          <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
+          <ClearFiltersButton />
         </div>
-        <ClientSelect clients={[{ client_id: "", client_name: "All clients", comp_id: compId }, ...clients]} compId={compId} clientId={clientId} />
-        <LifecycleFilter lifecycle={lifecycle} />
-        <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
-        <ClearFiltersButton />
       </div>
 
       <DetailedInvoicesTable invoices={invoices} clientId={clientId} />
