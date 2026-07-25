@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
+import { DateField } from "./DateField";
 
 export function CompanySelect({ companies, compId }) {
   const router = useRouter();
@@ -114,6 +115,38 @@ export function YearFilter({ years, year, yearType }) {
   );
 }
 
+// A custom day-level range, separate from (and taking priority over, on the
+// server side) the whole-year YearFilter above — for when "just 2026" isn't
+// precise enough. Either end can be left blank for an open-ended range.
+export function DateRangeFilter({ from, to }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  function updateParam(key, value) {
+    const params = new URLSearchParams(window.location.search);
+    if (value) params.set(key, value);
+    else params.delete(key);
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <DateField
+        value={from || ""}
+        onChange={(v) => updateParam("from", v)}
+        className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+      />
+      <span className="text-sm text-gray-400">to</span>
+      <DateField
+        value={to || ""}
+        onChange={(v) => updateParam("to", v)}
+        className="w-28 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+      />
+    </div>
+  );
+}
+
 // Lets the Detailed Invoices report jump straight to just Archived or just
 // Cancelled invoices — free-text search alone can't reliably do this since
 // legacy data has the "Cancled" typo instead of "Cancelled".
@@ -219,7 +252,7 @@ export function ProgressFilter({ options, selected }) {
 // Company/Client are deliberately left alone — those pick *which* business
 // context is being looked at, not a filter within it, same reasoning
 // CompanySelect/ClientSelect already apply when they preserve each other.
-const FILTER_PARAM_KEYS = ["search", "progress", "year", "yearType", "lifecycle"];
+const FILTER_PARAM_KEYS = ["search", "progress", "year", "yearType", "lifecycle", "from", "to"];
 
 export function ClearFiltersButton() {
   const router = useRouter();

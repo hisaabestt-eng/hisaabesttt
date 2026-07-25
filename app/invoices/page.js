@@ -18,6 +18,7 @@ import {
   SearchBox,
   ProgressFilter,
   YearFilter,
+  DateRangeFilter,
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
 import { AddInvoiceButton } from "@/components/InvoiceModal";
@@ -40,6 +41,8 @@ export default async function InvoicesPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
+  const from = params?.from || "";
+  const to = params?.to || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -61,7 +64,7 @@ export default async function InvoicesPage({ searchParams }) {
   const year = rawYear === "all" ? "" : rawYear;
 
   const [invoices, pos, estimatesForDirectInvoice, statusLabels, session, permissions] = await Promise.all([
-    listInvoices({ compId, clientId, search, progress, year, yearType }),
+    listInvoices({ compId, clientId, search, progress, year, yearType, from, to }),
     getPOsForPicker(compId, clientId),
     getEstimatesForDirectInvoicePicker(compId, clientId),
     getStatusLabels("invoice"),
@@ -101,6 +104,7 @@ export default async function InvoicesPage({ searchParams }) {
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <DateRangeFilter from={from} to={to} />
         <ClearFiltersButton />
         {canAdd && (
           <AddInvoiceButton

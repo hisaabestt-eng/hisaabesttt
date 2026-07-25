@@ -13,6 +13,7 @@ import {
   SearchBox,
   ProgressFilter,
   YearFilter,
+  DateRangeFilter,
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
 import { AddRecordButton } from "@/components/RecordModal";
@@ -23,6 +24,8 @@ export default async function RecordsPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
+  const from = params?.from || "";
+  const to = params?.to || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -57,7 +60,7 @@ export default async function RecordsPage({ searchParams }) {
     session,
     permissions,
   ] = await Promise.all([
-    listRecords({ compId, clientId, search, progress, year, yearType }),
+    listRecords({ compId, clientId, search, progress, year, yearType, from, to }),
     getClientsForCompanyPicker(compId),
     getStatusLabels("record"),
     getStatusLabels("estimate"),
@@ -88,6 +91,7 @@ export default async function RecordsPage({ searchParams }) {
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <DateRangeFilter from={from} to={to} />
         <ClearFiltersButton />
         {canAdd && (
           <AddRecordButton

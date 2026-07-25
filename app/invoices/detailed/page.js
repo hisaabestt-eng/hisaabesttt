@@ -5,6 +5,7 @@ import {
   ClientSelect,
   SearchBox,
   YearFilter,
+  DateRangeFilter,
   LifecycleFilter,
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
@@ -15,6 +16,8 @@ export default async function DetailedInvoicesPage({ searchParams }) {
   const search = params?.search || "";
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
   const lifecycle = params?.lifecycle || "";
+  const from = params?.from || "";
+  const to = params?.to || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -30,7 +33,7 @@ export default async function DetailedInvoicesPage({ searchParams }) {
   const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
   const year = rawYear === "all" ? "" : rawYear;
 
-  const invoices = await getDetailedInvoices({ compId, clientId, search, year, yearType, lifecycle });
+  const invoices = await getDetailedInvoices({ compId, clientId, search, year, yearType, lifecycle, from, to });
 
   return (
     <div className="flex flex-col gap-4">
@@ -46,6 +49,7 @@ export default async function DetailedInvoicesPage({ searchParams }) {
         <ClientSelect clients={[{ client_id: "", client_name: "All clients", comp_id: compId }, ...clients]} compId={compId} clientId={clientId} />
         <LifecycleFilter lifecycle={lifecycle} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <DateRangeFilter from={from} to={to} />
         <ClearFiltersButton />
       </div>
 

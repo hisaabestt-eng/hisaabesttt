@@ -10,6 +10,7 @@ import {
   SearchBox,
   ProgressFilter,
   YearFilter,
+  DateRangeFilter,
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
 import { AddPaymentButton } from "@/components/PaymentModal";
@@ -25,6 +26,8 @@ export default async function PaymentsPage({ searchParams }) {
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
   const tab = TAB_KEYS.includes(params?.tab) ? params.tab : "payments";
+  const from = params?.from || "";
+  const to = params?.to || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -45,9 +48,9 @@ export default async function PaymentsPage({ searchParams }) {
   const year = rawYear === "all" ? "" : rawYear;
 
   const [payments, outstandingInvoices, invoices, session, permissions] = await Promise.all([
-    listPayments({ compId, clientId, search, year, yearType }),
+    listPayments({ compId, clientId, search, year, yearType, from, to }),
     getOutstandingInvoices(compId, clientId),
-    listInvoiceSummaries({ compId, clientId, search, progress, year, yearType }),
+    listInvoiceSummaries({ compId, clientId, search, progress, year, yearType, from, to }),
     getServerSession(),
     getPermissions(),
   ]);
@@ -71,6 +74,7 @@ export default async function PaymentsPage({ searchParams }) {
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         {tab === "allocations" && <ProgressFilter options={INVOICE_PROGRESS_OPTIONS} selected={progress} />}
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <DateRangeFilter from={from} to={to} />
         <ClearFiltersButton />
         {tab === "payments" && canAdd && (
           <AddPaymentButton key={`${compId}-${clientId}`} compId={compId} clientId={clientId} />

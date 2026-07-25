@@ -12,6 +12,7 @@ import {
   SearchBox,
   ProgressFilter,
   YearFilter,
+  DateRangeFilter,
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
 import { AddPOButton } from "@/components/POModal";
@@ -34,6 +35,8 @@ export default async function PurchaseOrdersPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : "calendar";
+  const from = params?.from || "";
+  const to = params?.to || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -55,7 +58,7 @@ export default async function PurchaseOrdersPage({ searchParams }) {
   const year = rawYear === "all" ? "" : rawYear;
 
   const [purchaseOrders, estimatesWithoutPO, statusLabels, session, permissions] = await Promise.all([
-    listPOs({ compId, clientId, search, progress, year, yearType }),
+    listPOs({ compId, clientId, search, progress, year, yearType, from, to }),
     getEstimatesWithoutPO(compId, clientId),
     getStatusLabels("po"),
     getServerSession(),
@@ -85,6 +88,7 @@ export default async function PurchaseOrdersPage({ searchParams }) {
         <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         <ProgressFilter options={progressOptions} selected={progress} />
         <YearFilter years={years} year={rawYear} yearType={yearType} />
+        <DateRangeFilter from={from} to={to} />
         <ClearFiltersButton />
         {canAdd && (
           <AddPOButton key={`${compId}-${clientId}`} compId={compId} estimatesWithoutPO={estimatesWithoutPO} />
