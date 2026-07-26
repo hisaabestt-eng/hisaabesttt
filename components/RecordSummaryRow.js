@@ -36,9 +36,22 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
   // matching invoice, but the other invoices in the same PO/estimate still
   // exist and shouldn't become unreachable just because they didn't match.
   const allInvoices = row.allInvoices || invoices;
-  // Only worth expanding when there's more than one invoice to break down —
-  // a single invoice's status is already the row's own badge above.
-  const expandable = allInvoices.length > 1;
+  // How much of the estimate/PO amount hasn't been invoiced yet — cancelled
+  // invoices don't count as invoiced, same rule the PO page's own "Balance
+  // to Invoice" field uses, just recomputed here from the invoices already
+  // on hand instead of a separate query.
+  // Only meaningful once at least one invoice actually exists — a record
+  // with none yet is already represented by the "PO Pending"/"Invoice
+  // Pending" badge below, no need to duplicate that as a synthetic row.
+  const invoicedSoFar = allInvoices
+    .filter((inv) => inv.lifecycle !== "Cancelled")
+    .reduce((sum, inv) => sum + (Number(inv.invoice_amount) || 0), 0);
+  const pendingAmount =
+    allInvoices.length > 0 ? Math.max((Number(row.estimate_amount) || 0) - invoicedSoFar, 0) : 0;
+  // Worth expanding whenever there's more than one invoice to break down, or
+  // there's an unbilled remainder to surface — a single invoice covering the
+  // full amount already has nothing more to show than the row's own badge.
+  const expandable = allInvoices.length > 1 || pendingAmount > 0;
 
   return (
     <>
@@ -103,7 +116,7 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
               <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-900/40">
                 Invoices for {row.estimate_description}
               </div>
-              <InvoiceBreakdownTable invoices={allInvoices} emptyMessage="" />
+              <InvoiceBreakdownTable invoices={allInvoices} pendingAmount={pendingAmount} emptyMessage="" />
             </div>
           </td>
         </tr>

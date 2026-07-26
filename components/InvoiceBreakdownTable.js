@@ -22,8 +22,12 @@ function formatDate(value) {
 
 // Shared by the Records/Estimates/Purchase Orders pages' expandable rows —
 // same invoice-level detail wherever a row's chain reaches Invoice.
-export function InvoiceBreakdownTable({ invoices, emptyMessage }) {
-  if (invoices.length === 0) {
+// `pendingAmount` (optional) adds one extra row for the portion of the
+// estimate/PO that hasn't been invoiced yet (cancelled invoices don't
+// count as invoiced) — otherwise that gap is just invisible.
+export function InvoiceBreakdownTable({ invoices, emptyMessage, pendingAmount = 0 }) {
+  const hasPending = pendingAmount > 0;
+  if (invoices.length === 0 && !hasPending) {
     return <p className="px-3 py-2.5 text-xs text-gray-400">{emptyMessage}</p>;
   }
   return (
@@ -70,6 +74,19 @@ export function InvoiceBreakdownTable({ invoices, emptyMessage }) {
             </td>
           </tr>
         ))}
+        {hasPending && (
+          <tr>
+            <td colSpan={2} className="px-3 py-2 text-gray-400 dark:text-gray-500">Not yet raised</td>
+            <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">{formatMoney(pendingAmount)}</td>
+            <td className="px-3 py-2 text-right text-gray-400 dark:text-gray-500">—</td>
+            <td></td>
+            <td className="px-3 py-2 text-center">
+              <span className="inline-block rounded-full bg-orange-500 px-2 py-0.5 text-xs font-medium text-white">
+                Invoice Pending
+              </span>
+            </td>
+          </tr>
+        )}
       </tbody>
     </table>
   );
