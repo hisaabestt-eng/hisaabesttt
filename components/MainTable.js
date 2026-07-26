@@ -50,6 +50,7 @@ export function MainTable({ rows, totalCount, search, progress }) {
   const narrowedRows = visibleRows.map((row) => ({
     ...row,
     invoices: narrowInvoicesToProgress(narrowInvoicesToSearch(row.invoices, search), progress),
+    allInvoices: row.invoices || [],
   }));
 
   const totalAmount = narrowedRows.reduce((sum, row) => sum + mainRowAmount(row), 0);

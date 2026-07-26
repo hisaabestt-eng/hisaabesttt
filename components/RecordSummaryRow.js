@@ -31,9 +31,14 @@ function formatDate(value) {
 export function RecordSummaryRow({ row, refining = false, checked = true, onToggle }) {
   const [open, setOpen] = useState(false);
   const invoices = row.invoices || [];
+  // The full group this row belongs to, before any search/progress
+  // narrowing — a filter can narrow the badge/amount above down to a single
+  // matching invoice, but the other invoices in the same PO/estimate still
+  // exist and shouldn't become unreachable just because they didn't match.
+  const allInvoices = row.allInvoices || invoices;
   // Only worth expanding when there's more than one invoice to break down —
   // a single invoice's status is already the row's own badge above.
-  const expandable = invoices.length > 1;
+  const expandable = allInvoices.length > 1;
 
   return (
     <>
@@ -98,7 +103,7 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
               <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-900/40">
                 Invoices for {row.estimate_description}
               </div>
-              <InvoiceBreakdownTable invoices={invoices} emptyMessage="" />
+              <InvoiceBreakdownTable invoices={allInvoices} emptyMessage="" />
             </div>
           </td>
         </tr>
