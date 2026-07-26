@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
 import { narrowInvoicesToSearch, narrowInvoicesToProgress } from "@/lib/searchNarrow";
-import { progressLabel } from "@/lib/status";
+import { progressLabel, mainRowAmount } from "@/lib/status";
 import { RecordSummaryRow } from "./RecordSummaryRow";
 
 function formatMoney(value) {
@@ -44,8 +44,6 @@ export function MainTable({ rows, totalCount, search, progress }) {
   const [capturing, setCapturing] = useState(false);
   const [exportError, setExportError] = useState("");
 
-  const totalAmount = visibleRows.reduce((sum, row) => sum + (Number(row.estimate_amount) || 0), 0);
-
   // The narrowed rows actually rendered on screen — same computation
   // RecordSummaryRow gets below, kept here too so Excel/PNG exports match
   // exactly what's visible instead of the pre-narrowed server data.
@@ -53,6 +51,8 @@ export function MainTable({ rows, totalCount, search, progress }) {
     ...row,
     invoices: narrowInvoicesToProgress(narrowInvoicesToSearch(row.invoices, search), progress),
   }));
+
+  const totalAmount = narrowedRows.reduce((sum, row) => sum + mainRowAmount(row), 0);
 
   async function handleExportExcel() {
     setExportError("");
@@ -67,7 +67,7 @@ export function MainTable({ rows, totalCount, search, progress }) {
         "Record ID": row.record_id,
         Date: formatDate(row.estimate_date),
         Description: row.estimate_description,
-        Amount: Number(row.estimate_amount) || 0,
+        Amount: mainRowAmount(row),
         Status: rowStatusText(row),
       }));
       const ws = XLSX.utils.json_to_sheet(sheetRows);

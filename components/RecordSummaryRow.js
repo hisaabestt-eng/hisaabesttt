@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { STATUS_STYLES, progressLabel, progressStyle } from "@/lib/status";
+import { STATUS_STYLES, progressLabel, progressStyle, mainRowAmount } from "@/lib/status";
 import RecordDetailButton from "./RecordDetailModal";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 
@@ -59,7 +59,7 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300" onClick={(e) => e.stopPropagation()}>
           <RecordDetailButton recordId={row.record_id} description={row.estimate_description} />
         </td>
-        <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(row.estimate_amount)}</td>
+        <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(mainRowAmount(row))}</td>
         <td className="px-3 py-3 text-center">
           {invoices.length > 1 ? (
             <span className="inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full bg-gray-400 px-2.5 py-1 text-xs font-semibold text-white">
