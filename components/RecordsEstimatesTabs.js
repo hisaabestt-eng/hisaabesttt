@@ -3,8 +3,8 @@
 import { useRouter, usePathname } from "next/navigation";
 
 const TABS = [
-  { key: "estimates", label: "Estimates" },
   { key: "records", label: "Records" },
+  { key: "estimates", label: "Estimates" },
 ];
 
 export function RecordsEstimatesTabs({ active }) {

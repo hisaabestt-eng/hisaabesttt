@@ -44,7 +44,7 @@ export default async function EstimatesPage({ searchParams }) {
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : params?.yearType === "custom" ? "custom" : "calendar";
-  const tab = TAB_KEYS.includes(params?.tab) ? params.tab : "estimates";
+  const tab = TAB_KEYS.includes(params?.tab) ? params.tab : "records";
   const from = params?.from || "";
   const to = params?.to || "";
 
