@@ -81,36 +81,105 @@ export function MainTable({ rows, totalCount, search, progress }) {
     setExporting(false);
   }
 
+  // Keeps each downloaded image a reasonable, easy-to-view height instead of
+  // one giant strip — greedily packs whole rows into a chunk until adding
+  // another would cross this budget (px, unscaled).
+  const MAX_CHUNK_HEIGHT = 1400;
+
+  function stripUnderline(root) {
+    root.querySelectorAll(".underline").forEach((el) => {
+      el.classList.remove("underline", "decoration-dotted");
+      el.style.textDecoration = "none";
+    });
+  }
+
+  async function captureChunk(html2canvas, { thead, rows, tfoot, tableClassName, label }) {
+    const wrapDiv = document.createElement("div");
+    wrapDiv.className = "rounded-lg border border-gray-100 bg-white p-2";
+    wrapDiv.style.position = "fixed";
+    wrapDiv.style.top = "-99999px";
+    wrapDiv.style.left = "-99999px";
+
+    if (label) {
+      const caption = document.createElement("div");
+      caption.className = "px-1 pb-2 text-xs font-medium text-gray-500";
+      caption.textContent = label;
+      wrapDiv.appendChild(caption);
+    }
+
+    const cloneTable = document.createElement("table");
+    cloneTable.className = tableClassName;
+    const cloneThead = thead.cloneNode(true);
+    cloneThead.classList.remove("sticky", "top-0", "bottom-0");
+    cloneTable.appendChild(cloneThead);
+    const cloneTbody = document.createElement("tbody");
+    cloneTbody.className = "divide-y divide-gray-100";
+    rows.forEach((r) => cloneTbody.appendChild(r.cloneNode(true)));
+    cloneTable.appendChild(cloneTbody);
+    if (tfoot) {
+      const cloneTfoot = tfoot.cloneNode(true);
+      cloneTfoot.classList.remove("sticky", "top-0", "bottom-0");
+      cloneTable.appendChild(cloneTfoot);
+    }
+    wrapDiv.appendChild(cloneTable);
+
+    // html2canvas-pro mis-renders a dotted underline as a strike-through the
+    // middle of the text — that underline is only a "this is clickable"
+    // hint anyway, meaningless in a static image, so drop it.
+    stripUnderline(wrapDiv);
+
+    document.body.appendChild(wrapDiv);
+    const canvas = await html2canvas(wrapDiv, { backgroundColor: "#ffffff", scale: 2 });
+    document.body.removeChild(wrapDiv);
+    return canvas;
+  }
+
   async function handleScreenshot() {
     setExportError("");
     if (!tableWrapperRef.current) return;
     setCapturing(true);
     try {
       const html2canvas = (await import("html2canvas-pro")).default;
-      // Clone the table out of the scrollable/sticky wrapper so the capture
-      // includes every row (not just what's currently scrolled into view).
-      const clone = tableWrapperRef.current.cloneNode(true);
-      clone.className = "rounded-lg border border-gray-100 bg-white";
-      clone.style.position = "fixed";
-      clone.style.top = "-99999px";
-      clone.style.left = "-99999px";
-      clone.style.maxHeight = "none";
-      clone.style.overflow = "visible";
-      clone.querySelectorAll(".sticky").forEach((el) => el.classList.remove("sticky", "top-0", "bottom-0"));
-      // html2canvas-pro mis-renders a dotted underline as a strike-through
-      // the middle of the text — that underline is only a "this is
-      // clickable" hint anyway, meaningless in a static image, so drop it.
-      clone.querySelectorAll(".underline").forEach((el) => {
-        el.classList.remove("underline", "decoration-dotted");
-        el.style.textDecoration = "none";
-      });
-      document.body.appendChild(clone);
-      const canvas = await html2canvas(clone, { backgroundColor: "#ffffff", scale: 2 });
-      document.body.removeChild(clone);
-      const link = document.createElement("a");
-      link.download = `main-page-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      const table = tableWrapperRef.current.querySelector("table");
+      const thead = table.querySelector("thead");
+      const tbody = table.querySelector("tbody");
+      const tfoot = table.querySelector("tfoot");
+      const allRows = Array.from(tbody.children);
+
+      const chunks = [];
+      let current = [];
+      let currentHeight = 0;
+      for (const row of allRows) {
+        const h = row.offsetHeight;
+        if (current.length > 0 && currentHeight + h > MAX_CHUNK_HEIGHT) {
+          chunks.push(current);
+          current = [];
+          currentHeight = 0;
+        }
+        current.push(row);
+        currentHeight += h;
+      }
+      chunks.push(current);
+
+      const stamp = Date.now();
+      for (let i = 0; i < chunks.length; i++) {
+        const isLast = i === chunks.length - 1;
+        const canvas = await captureChunk(html2canvas, {
+          thead,
+          rows: chunks[i],
+          tfoot: isLast ? tfoot : null,
+          tableClassName: table.className,
+          label: chunks.length > 1 ? `Main Page — part ${i + 1} of ${chunks.length}` : null,
+        });
+        const link = document.createElement("a");
+        link.download =
+          chunks.length > 1 ? `main-page-${stamp}-part${i + 1}.png` : `main-page-${stamp}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        // Small gap so the browser doesn't treat back-to-back downloads as
+        // an unwanted multi-download flood and block the later ones.
+        if (!isLast) await new Promise((r) => setTimeout(r, 300));
+      }
     } catch (e) {
       setExportError(`Could not create screenshot: ${e?.message || e}`);
     }
