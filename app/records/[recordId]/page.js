@@ -173,7 +173,7 @@ export default async function RecordDetailPage({ params }) {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
       <Link
-        href={`/records?company=${record.comp_id}&client=${record.client_id}`}
+        href={`/estimates?tab=records&company=${record.comp_id}&client=${record.client_id}`}
         className="text-sm text-blue-600 underline"
       >
         ← Back to Records

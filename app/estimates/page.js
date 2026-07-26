@@ -2,13 +2,13 @@ import { existsSync } from "fs";
 import path from "path";
 import { getCompanies, getClients, getDefaultCompany } from "@/lib/records";
 import { listEstimates, getEstimateYears, getSuggestedEstNosByClient } from "@/lib/estimatesAdmin";
-import { getRecordsWithoutEstimate } from "@/lib/recordsAdmin";
+import { listRecords, getRecordsWithoutEstimate, getClientsForCompanyPicker, getRecordYears } from "@/lib/recordsAdmin";
 import { listPOs } from "@/lib/poAdmin";
 import { listInvoices } from "@/lib/invoicesAdmin";
 import { getStatusLabels } from "@/lib/settingsAdmin";
 import { getServerSession } from "@/lib/session";
 import { getPermissions } from "@/lib/permissions";
-import { ESTIMATE_PROGRESS_OPTIONS } from "@/lib/status";
+import { ESTIMATE_PROGRESS_OPTIONS, RECORD_PROGRESS_OPTIONS } from "@/lib/status";
 import {
   CompanySelect,
   ClientSelect,
@@ -18,7 +18,10 @@ import {
   ClearFiltersButton,
 } from "@/components/MainFilterBar";
 import { AddEstimateButton } from "@/components/EstimateModal";
+import { AddRecordButton } from "@/components/RecordModal";
 import { EstimatesTable } from "@/components/EstimatesTable";
+import { RecordsTable } from "@/components/RecordsTable";
+import { RecordsEstimatesTabs } from "@/components/RecordsEstimatesTabs";
 
 // Uploaded files are stored on disk as "<est_id>-<original name>". Old seed
 // data has document *rows* with no real file behind them (upload wasn't
@@ -34,11 +37,14 @@ function documentFileExists(estId, fileName) {
   );
 }
 
+const TAB_KEYS = ["estimates", "records"];
+
 export default async function EstimatesPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
   const progress = params?.progress ? params.progress.split(",") : [];
   const yearType = params?.yearType === "fy" ? "fy" : params?.yearType === "custom" ? "custom" : "calendar";
+  const tab = TAB_KEYS.includes(params?.tab) ? params.tab : "estimates";
   const from = params?.from || "";
   const to = params?.to || "";
 
@@ -52,11 +58,10 @@ export default async function EstimatesPage({ searchParams }) {
   )?.client_id;
   const clientId = params?.client || defaultClientId || clientsForCompany[0]?.client_id || "";
 
-  const years = await getEstimateYears(compId);
-  // Defaulting to the current year hides everything for a company whose
-  // data is all from a past year — only do it when the current year
-  // actually has data; otherwise show everything (matches what the Year
-  // dropdown displays when nothing has been explicitly chosen).
+  // Each tab has its own underlying data (estimates vs. records), so its own
+  // list of years with data — used for both the Year dropdown itself and the
+  // "does the current year actually have data" default-year check below.
+  const years = await (tab === "records" ? getRecordYears(compId) : getEstimateYears(compId));
   const currentYear = new Date().getFullYear();
   const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
   const year = rawYear === "all" ? "" : rawYear;
@@ -64,26 +69,35 @@ export default async function EstimatesPage({ searchParams }) {
   const NO_FILTER = { search: "", progress: [], year: "", yearType: "calendar" };
   const [
     estimates,
+    records,
     recordsWithoutEstimate,
-    statusLabels,
+    pickerClients,
+    recordStatusLabels,
+    estimateStatusLabels,
     poStatusLabels,
     allPOs,
     allInvoices,
+    allEstimates,
     suggestedEstNosByClient,
     session,
     permissions,
   ] = await Promise.all([
     listEstimates({ compId, clientId, search, progress, year, yearType, from, to }),
+    listRecords({ compId, clientId, search, progress, year, yearType, from, to }),
     getRecordsWithoutEstimate(compId, clientId),
+    getClientsForCompanyPicker(compId),
+    getStatusLabels("record"),
     getStatusLabels("estimate"),
     getStatusLabels("po"),
     listPOs({ compId, clientId: "", ...NO_FILTER }),
     listInvoices({ compId, clientId: "", ...NO_FILTER }),
+    listEstimates({ compId, clientId: "", ...NO_FILTER }),
     getSuggestedEstNosByClient(compId),
     getServerSession(),
     getPermissions(),
   ]);
-  const progressOptions = [...ESTIMATE_PROGRESS_OPTIONS, ...statusLabels.map((l) => l.label_name)];
+  const estimateProgressOptions = [...ESTIMATE_PROGRESS_OPTIONS, ...estimateStatusLabels.map((l) => l.label_name)];
+  const recordProgressOptions = [...RECORD_PROGRESS_OPTIONS, ...recordStatusLabels.map((l) => l.label_name)];
   const canAdd = session.role === "admin" || permissions.can_add;
   const canEdit = session.role === "admin" || permissions.can_edit;
   const canDelete = session.role === "admin" || permissions.can_delete;
@@ -100,6 +114,8 @@ export default async function EstimatesPage({ searchParams }) {
         <CompanySelect companies={companies} compId={compId} />
       </div>
 
+      <RecordsEstimatesTabs active={tab} />
+
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <div className="min-w-0 flex-1">
@@ -108,33 +124,61 @@ export default async function EstimatesPage({ searchParams }) {
           <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <ProgressFilter options={progressOptions} selected={progress} />
+          <ProgressFilter
+            options={tab === "records" ? recordProgressOptions : estimateProgressOptions}
+            selected={progress}
+          />
           <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
           <ClearFiltersButton />
           {canAdd && (
             <div className="ml-auto">
-              <AddEstimateButton
-                key={`${compId}-${clientId}`}
-                compId={compId}
-                recordsWithoutEstimate={recordsWithoutEstimate}
-                suggestedEstNosByClient={suggestedEstNosByClient}
-              />
+              {tab === "records" ? (
+                <AddRecordButton
+                  key={compId}
+                  compId={compId}
+                  clients={pickerClients}
+                  suggestedEstNosByClient={suggestedEstNosByClient}
+                />
+              ) : (
+                <AddEstimateButton
+                  key={`${compId}-${clientId}`}
+                  compId={compId}
+                  recordsWithoutEstimate={recordsWithoutEstimate}
+                  suggestedEstNosByClient={suggestedEstNosByClient}
+                />
+              )}
             </div>
           )}
         </div>
       </div>
 
-      <EstimatesTable
-        estimates={estimatesWithDocFlag}
-        allPOs={allPOs}
-        allInvoices={allInvoices}
-        statusLabels={statusLabels}
-        poStatusLabels={poStatusLabels}
-        canEdit={canEdit}
-        canDelete={canDelete}
-        search={search}
-        progress={progress}
-      />
+      {tab === "records" ? (
+        <RecordsTable
+          records={records}
+          allEstimates={allEstimates}
+          allPOs={allPOs}
+          allInvoices={allInvoices}
+          statusLabels={recordStatusLabels}
+          estimateStatusLabels={estimateStatusLabels}
+          poStatusLabels={poStatusLabels}
+          canEdit={canEdit}
+          canDelete={canDelete}
+          search={search}
+          progress={progress}
+        />
+      ) : (
+        <EstimatesTable
+          estimates={estimatesWithDocFlag}
+          allPOs={allPOs}
+          allInvoices={allInvoices}
+          statusLabels={estimateStatusLabels}
+          poStatusLabels={poStatusLabels}
+          canEdit={canEdit}
+          canDelete={canDelete}
+          search={search}
+          progress={progress}
+        />
+      )}
     </div>
   );
 }

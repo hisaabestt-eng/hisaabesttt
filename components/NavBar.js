@@ -7,7 +7,6 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const BASE_LINKS = [
   { href: "/", label: "Main" },
-  { href: "/records", label: "Records" },
   { href: "/estimates", label: "Estimates" },
   { href: "/purchase-orders", label: "Purchase Orders" },
   { href: "/invoices", label: "Invoices" },
@@ -18,11 +17,15 @@ const BASE_LINKS = [
 // itself, so it's only shown (and only reachable — see proxy.js) for admins.
 const ADMIN_LINKS = [{ href: "/settings", label: "Settings" }];
 
-// A nav link should also light up on its own nested/dynamic routes (e.g.
-// "/records/RC-0001" should highlight "Records"), so this matches on prefix
-// rather than exact pathname — picking the longest matching prefix in case
-// two links' hrefs are ever themselves nested inside one another.
+// A nav link should also light up on its own nested/dynamic routes, so this
+// matches on prefix rather than exact pathname — picking the longest
+// matching prefix in case two links' hrefs are ever themselves nested
+// inside one another. "/records/RC-0001" (the record detail page) is a
+// special case: it's still its own route, but "Records" no longer has a
+// top-level link of its own since it moved under the Estimates page's
+// Records tab, so it lights up "Estimates" instead.
 function findActiveHref(pathname, links) {
+  if (pathname.startsWith("/records/")) return "/estimates";
   const matches = links.filter(
     (link) => link.href === "/" ? pathname === "/" : pathname === link.href || pathname.startsWith(`${link.href}/`)
   );
