@@ -39,7 +39,7 @@ export default async function RootLayout({ children }) {
       <body className="min-h-full flex flex-col bg-gray-100 dark:bg-gray-900">
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <NavBar session={session} />
-        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6">{children}</main>
+        <main className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col px-4 py-6">{children}</main>
       </body>
     </html>
   );
