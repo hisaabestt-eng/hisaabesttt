@@ -28,7 +28,7 @@ function formatDate(value) {
 }
 
 export function DetailedInvoicesTable({ invoices, clientId }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     invoices,
     (inv) => inv.inv_id
   );
@@ -62,6 +62,8 @@ export function DetailedInvoicesTable({ invoices, clientId }) {
           toggleRefining={toggleRefining}
           totalCount={invoices.length}
           visibleCount={visibleRows.length}
+          selectAll={selectAll}
+          deselectAll={deselectAll}
         />
       </div>
 

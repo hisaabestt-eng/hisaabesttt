@@ -35,7 +35,7 @@ function rowStatusText(row) {
 }
 
 export function MainTable({ rows, totalCount, search, progress }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     rows,
     (row) => row.record_id
   );
@@ -212,6 +212,8 @@ export function MainTable({ rows, totalCount, search, progress }) {
             toggleRefining={toggleRefining}
             totalCount={rows.length}
             visibleCount={visibleRows.length}
+            selectAll={selectAll}
+            deselectAll={deselectAll}
           />
         </div>
       </div>

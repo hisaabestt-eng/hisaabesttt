@@ -41,6 +41,16 @@ export function useRefineFilter(rows, getRowId) {
     setHiddenIds(new Set());
   }
 
+  // Gmail-style "select all" / "select none" — much faster than unticking
+  // (or reticking) rows one at a time on a long list.
+  function selectAll() {
+    setHiddenIds(new Set());
+  }
+
+  function deselectAll() {
+    setHiddenIds(new Set(rows.map(getRowId)));
+  }
+
   const visibleRows = refining ? rows.filter((r) => !hiddenIds.has(getRowId(r))) : rows;
 
   return {
@@ -50,12 +60,21 @@ export function useRefineFilter(rows, getRowId) {
     isChecked: (id) => !hiddenIds.has(id),
     toggleRow,
     hiddenCount: hiddenIds.size,
+    selectAll,
+    deselectAll,
   };
 }
 
-export function RefineToggleButton({ refining, toggleRefining, totalCount, visibleCount }) {
+export function RefineToggleButton({
+  refining,
+  toggleRefining,
+  totalCount,
+  visibleCount,
+  selectAll,
+  deselectAll,
+}) {
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+    <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
       <button
         type="button"
         onClick={toggleRefining}
@@ -68,9 +87,26 @@ export function RefineToggleButton({ refining, toggleRefining, totalCount, visib
         {refining ? "Done refining" : "Refine list"}
       </button>
       {refining && (
-        <span>
-          {visibleCount} of {totalCount} shown — untick a row to drop it from this view
-        </span>
+        <>
+          <button
+            type="button"
+            onClick={selectAll}
+            className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Select all
+          </button>
+          <span className="text-gray-300 dark:text-gray-600">|</span>
+          <button
+            type="button"
+            onClick={deselectAll}
+            className="text-xs font-medium text-blue-600 hover:underline dark:text-blue-400"
+          >
+            Deselect all
+          </button>
+          <span>
+            {visibleCount} of {totalCount} shown — untick a row to drop it from this view
+          </span>
+        </>
       )}
     </div>
   );

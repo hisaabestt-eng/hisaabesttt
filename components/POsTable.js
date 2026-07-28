@@ -16,7 +16,7 @@ function formatMoney(value) {
 // docFileExists is resolved server-side per PO (needs Node's fs, not
 // available here) and passed in already computed, as po.docFileExists.
 export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, search, progress }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     purchaseOrders,
     (po) => po.po_id
   );
@@ -43,6 +43,8 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, sea
           toggleRefining={toggleRefining}
           totalCount={purchaseOrders.length}
           visibleCount={visibleRows.length}
+          selectAll={selectAll}
+          deselectAll={deselectAll}
         />
       </div>
 

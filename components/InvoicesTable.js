@@ -33,7 +33,7 @@ function formatDate(value) {
 // (need Node's fs, not available here) and passed in already computed, as
 // inv.docFileExists / inv.storedFileName.
 export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     invoices,
     (inv) => inv.inv_id
   );
@@ -52,6 +52,8 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
           toggleRefining={toggleRefining}
           totalCount={invoices.length}
           visibleCount={visibleRows.length}
+          selectAll={selectAll}
+          deselectAll={deselectAll}
         />
       </div>
 

@@ -13,7 +13,7 @@ function formatMoney(value) {
 }
 
 export function PaymentAllocationsTable({ invoices, canEdit }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     invoices,
     (inv) => inv.inv_id
   );
@@ -40,6 +40,8 @@ export function PaymentAllocationsTable({ invoices, canEdit }) {
           toggleRefining={toggleRefining}
           totalCount={invoices.length}
           visibleCount={visibleRows.length}
+          selectAll={selectAll}
+          deselectAll={deselectAll}
         />
       </div>
 

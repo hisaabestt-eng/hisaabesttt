@@ -26,7 +26,7 @@ export function RecordsTable({
   search,
   progress,
 }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     records,
     (r) => r.record_id
   );
@@ -49,6 +49,8 @@ export function RecordsTable({
           toggleRefining={toggleRefining}
           totalCount={records.length}
           visibleCount={visibleRows.length}
+          selectAll={selectAll}
+          deselectAll={deselectAll}
         />
       </div>
 

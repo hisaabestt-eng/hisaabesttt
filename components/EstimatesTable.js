@@ -27,7 +27,7 @@ export function EstimatesTable({
   search,
   progress,
 }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     estimates,
     (e) => e.est_id
   );
@@ -46,6 +46,8 @@ export function EstimatesTable({
           toggleRefining={toggleRefining}
           totalCount={estimates.length}
           visibleCount={visibleRows.length}
+          selectAll={selectAll}
+          deselectAll={deselectAll}
         />
       </div>
 

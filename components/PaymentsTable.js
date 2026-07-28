@@ -13,7 +13,7 @@ function formatMoney(value) {
 }
 
 export function PaymentsTable({ payments, outstandingInvoices, canEdit, canDelete }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow } = useRefineFilter(
+  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
     payments,
     (py) => py.py_id
   );
@@ -36,6 +36,8 @@ export function PaymentsTable({ payments, outstandingInvoices, canEdit, canDelet
           toggleRefining={toggleRefining}
           totalCount={payments.length}
           visibleCount={visibleRows.length}
+          selectAll={selectAll}
+          deselectAll={deselectAll}
         />
       </div>
 
