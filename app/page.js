@@ -8,7 +8,6 @@ import {
   ProgressFilter,
   YearFilter,
   ClearFiltersButton,
-  EnteredTodayButton,
 } from "@/components/MainFilterBar";
 import { MainTable } from "@/components/MainTable";
 
@@ -60,7 +59,6 @@ export default async function Home({ searchParams }) {
         <div className="flex flex-wrap items-center gap-3">
           <ProgressFilter options={MAIN_PROGRESS_OPTIONS} selected={progress} />
           <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
-          <EnteredTodayButton />
           <ClearFiltersButton />
         </div>
       </div>
