@@ -8,6 +8,7 @@ import {
   ProgressFilter,
   YearFilter,
   ClearFiltersButton,
+  EnteredTodayButton,
 } from "@/components/MainFilterBar";
 import { MainTable } from "@/components/MainTable";
 
@@ -18,6 +19,7 @@ export default async function Home({ searchParams }) {
   const yearType = params?.yearType === "fy" ? "fy" : params?.yearType === "custom" ? "custom" : "calendar";
   const from = params?.from || "";
   const to = params?.to || "";
+  const enteredOn = params?.enteredOn || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -39,7 +41,7 @@ export default async function Home({ searchParams }) {
   const rawYear = params?.year || (years.includes(currentYear) ? String(currentYear) : "all");
   const year = rawYear === "all" ? "" : rawYear;
 
-  const overview = await getRecordsOverview({ compId, clientId, search, progress, year, yearType, from, to });
+  const overview = await getRecordsOverview({ compId, clientId, search, progress, year, yearType, from, to, enteredOn });
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-4">
@@ -58,6 +60,7 @@ export default async function Home({ searchParams }) {
         <div className="flex flex-wrap items-center gap-3">
           <ProgressFilter options={MAIN_PROGRESS_OPTIONS} selected={progress} />
           <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
+          <EnteredTodayButton />
           <ClearFiltersButton />
         </div>
       </div>

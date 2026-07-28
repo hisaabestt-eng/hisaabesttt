@@ -3,6 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 import { DateField } from "./DateField";
+import { toDateString } from "@/lib/dates";
 
 export function CompanySelect({ companies, compId }) {
   const router = useRouter();
@@ -259,7 +260,7 @@ export function ProgressFilter({ options, selected }) {
 // Company/Client are deliberately left alone — those pick *which* business
 // context is being looked at, not a filter within it, same reasoning
 // CompanySelect/ClientSelect already apply when they preserve each other.
-const FILTER_PARAM_KEYS = ["search", "progress", "year", "yearType", "lifecycle", "from", "to"];
+const FILTER_PARAM_KEYS = ["search", "progress", "year", "yearType", "lifecycle", "from", "to", "enteredOn"];
 
 export function ClearFiltersButton() {
   const router = useRouter();
@@ -283,6 +284,42 @@ export function ClearFiltersButton() {
       className="rounded-full border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
     >
       Clear filters
+    </button>
+  );
+}
+
+// Filters by when the row was actually entered into the system
+// (created_at), not its own business date field — finds everything typed
+// in today even if it's back-dated to an earlier day. "Today" is computed
+// fresh from the browser's own clock on every click (not a stale value
+// baked in at page load), so it stays correct even in a tab left open
+// across midnight.
+export function EnteredTodayButton() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const today = toDateString(new Date());
+  const active = searchParams.get("enteredOn") === today;
+
+  function handleClick() {
+    const params = new URLSearchParams(window.location.search);
+    if (active) params.delete("enteredOn");
+    else params.set("enteredOn", toDateString(new Date()));
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+        active
+          ? "border-blue-600 bg-blue-600 text-white"
+          : "border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700"
+      }`}
+    >
+      Entered Today
     </button>
   );
 }

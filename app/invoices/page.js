@@ -19,6 +19,7 @@ import {
   ProgressFilter,
   YearFilter,
   ClearFiltersButton,
+  EnteredTodayButton,
 } from "@/components/MainFilterBar";
 import { AddInvoiceButton } from "@/components/InvoiceModal";
 import { InvoicesTable } from "@/components/InvoicesTable";
@@ -42,6 +43,7 @@ export default async function InvoicesPage({ searchParams }) {
   const yearType = params?.yearType === "fy" ? "fy" : params?.yearType === "custom" ? "custom" : "calendar";
   const from = params?.from || "";
   const to = params?.to || "";
+  const enteredOn = params?.enteredOn || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -63,7 +65,7 @@ export default async function InvoicesPage({ searchParams }) {
   const year = rawYear === "all" ? "" : rawYear;
 
   const [invoices, pos, estimatesForDirectInvoice, statusLabels, session, permissions] = await Promise.all([
-    listInvoices({ compId, clientId, search, progress, year, yearType, from, to }),
+    listInvoices({ compId, clientId, search, progress, year, yearType, from, to, enteredOn }),
     getPOsForPicker(compId, clientId),
     getEstimatesForDirectInvoicePicker(compId, clientId),
     getStatusLabels("invoice"),
@@ -106,6 +108,7 @@ export default async function InvoicesPage({ searchParams }) {
         <div className="flex flex-wrap items-center gap-3">
           <ProgressFilter options={progressOptions} selected={progress} />
           <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
+          <EnteredTodayButton />
           <ClearFiltersButton />
           {canAdd && (
             <div className="ml-auto">

@@ -16,6 +16,7 @@ import {
   ProgressFilter,
   YearFilter,
   ClearFiltersButton,
+  EnteredTodayButton,
 } from "@/components/MainFilterBar";
 import { AddEstimateButton } from "@/components/EstimateModal";
 import { AddRecordButton } from "@/components/RecordModal";
@@ -47,6 +48,7 @@ export default async function EstimatesPage({ searchParams }) {
   const tab = TAB_KEYS.includes(params?.tab) ? params.tab : "records";
   const from = params?.from || "";
   const to = params?.to || "";
+  const enteredOn = params?.enteredOn || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -82,8 +84,8 @@ export default async function EstimatesPage({ searchParams }) {
     session,
     permissions,
   ] = await Promise.all([
-    listEstimates({ compId, clientId, search, progress, year, yearType, from, to }),
-    listRecords({ compId, clientId, search, progress, year, yearType, from, to }),
+    listEstimates({ compId, clientId, search, progress, year, yearType, from, to, enteredOn }),
+    listRecords({ compId, clientId, search, progress, year, yearType, from, to, enteredOn }),
     getRecordsWithoutEstimate(compId, clientId),
     getClientsForCompanyPicker(compId),
     getStatusLabels("record"),
@@ -129,6 +131,7 @@ export default async function EstimatesPage({ searchParams }) {
             selected={progress}
           />
           <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
+          <EnteredTodayButton />
           <ClearFiltersButton />
           {canAdd && (
             <div className="ml-auto">

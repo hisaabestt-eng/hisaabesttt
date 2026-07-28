@@ -11,6 +11,7 @@ import {
   ProgressFilter,
   YearFilter,
   ClearFiltersButton,
+  EnteredTodayButton,
 } from "@/components/MainFilterBar";
 import { AddPaymentButton } from "@/components/PaymentModal";
 import { PaymentsTable } from "@/components/PaymentsTable";
@@ -27,6 +28,7 @@ export default async function PaymentsPage({ searchParams }) {
   const tab = TAB_KEYS.includes(params?.tab) ? params.tab : "payments";
   const from = params?.from || "";
   const to = params?.to || "";
+  const enteredOn = params?.enteredOn || "";
 
   const [companies, clients] = await Promise.all([getCompanies(), getClients()]);
   const defaultCompany = params?.company ? null : await getDefaultCompany(companies);
@@ -47,9 +49,9 @@ export default async function PaymentsPage({ searchParams }) {
   const year = rawYear === "all" ? "" : rawYear;
 
   const [payments, outstandingInvoices, invoices, session, permissions] = await Promise.all([
-    listPayments({ compId, clientId, search, year, yearType, from, to }),
+    listPayments({ compId, clientId, search, year, yearType, from, to, enteredOn }),
     getOutstandingInvoices(compId, clientId),
-    listInvoiceSummaries({ compId, clientId, search, progress, year, yearType, from, to }),
+    listInvoiceSummaries({ compId, clientId, search, progress, year, yearType, from, to, enteredOn }),
     getServerSession(),
     getPermissions(),
   ]);
@@ -76,6 +78,7 @@ export default async function PaymentsPage({ searchParams }) {
         <div className="flex flex-wrap items-center gap-3">
           {tab === "allocations" && <ProgressFilter options={INVOICE_PROGRESS_OPTIONS} selected={progress} />}
           <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
+          <EnteredTodayButton />
           <ClearFiltersButton />
           {tab === "payments" && canAdd && (
             <div className="ml-auto">
