@@ -56,7 +56,10 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
   return (
     <>
       <tr
-        className={expandable ? "cursor-pointer hover:bg-gray-50" : "hover:bg-gray-50"}
+        data-record-id={row.record_id}
+        className={`${expandable ? "cursor-pointer hover:bg-gray-50" : "hover:bg-gray-50"} ${
+          refining && !checked ? "opacity-40" : ""
+        }`}
         onClick={() => expandable && setOpen((v) => !v)}
       >
         <td className="whitespace-nowrap px-3 py-3 text-gray-700 dark:text-gray-300">

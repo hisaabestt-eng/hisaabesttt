@@ -56,7 +56,10 @@ export function EstimateSummaryRow({
 
   return (
     <>
-      <tr className="cursor-pointer hover:bg-gray-50" onClick={() => setOpen((v) => !v)}>
+      <tr
+        className={`cursor-pointer hover:bg-gray-50 ${refining && !checked ? "opacity-40" : ""}`}
+        onClick={() => setOpen((v) => !v)}
+      >
         <td className="px-3 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
           {refining && (
             <input

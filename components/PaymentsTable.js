@@ -13,10 +13,8 @@ function formatMoney(value) {
 }
 
 export function PaymentsTable({ payments, outstandingInvoices, canEdit, canDelete }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
-    payments,
-    (py) => py.py_id
-  );
+  const { refining, toggleRefining, displayRows, visibleRows, isChecked, toggleRow, selectAll, deselectAll } =
+    useRefineFilter(payments, (py) => py.py_id);
 
   const totals = visibleRows.reduce(
     (acc, py) => {
@@ -55,7 +53,7 @@ export function PaymentsTable({ payments, outstandingInvoices, canEdit, canDelet
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {visibleRows.map((py) => (
+            {displayRows.map((py) => (
               <PaymentRow
                 key={py.py_id}
                 py={py}
@@ -67,15 +65,15 @@ export function PaymentsTable({ payments, outstandingInvoices, canEdit, canDelet
                 onToggle={toggleRow}
               />
             ))}
-            {visibleRows.length === 0 && (
+            {payments.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {payments.length === 0 ? "No payments found." : "All rows refined out — untick some to bring them back."}
+                  No payments found.
                 </td>
               </tr>
             )}
           </tbody>
-          {visibleRows.length > 0 && (
+          {payments.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">Total</td>

@@ -16,10 +16,8 @@ function formatMoney(value) {
 // docFileExists is resolved server-side per PO (needs Node's fs, not
 // available here) and passed in already computed, as po.docFileExists.
 export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, search, progress }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
-    purchaseOrders,
-    (po) => po.po_id
-  );
+  const { refining, toggleRefining, displayRows, visibleRows, isChecked, toggleRow, selectAll, deselectAll } =
+    useRefineFilter(purchaseOrders, (po) => po.po_id);
 
   const totals = visibleRows.reduce(
     (acc, po) => {
@@ -67,7 +65,7 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, sea
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {visibleRows.map((po) => (
+            {displayRows.map((po) => (
               <POSummaryRow
                 key={po.po_id}
                 po={{
@@ -83,17 +81,15 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, sea
                 onToggle={toggleRow}
               />
             ))}
-            {visibleRows.length === 0 && (
+            {purchaseOrders.length === 0 && (
               <tr>
                 <td colSpan={10} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {purchaseOrders.length === 0
-                    ? "No purchase orders found."
-                    : "All rows refined out — untick some to bring them back."}
+                  No purchase orders found.
                 </td>
               </tr>
             )}
           </tbody>
-          {visibleRows.length > 0 && (
+          {purchaseOrders.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={4} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

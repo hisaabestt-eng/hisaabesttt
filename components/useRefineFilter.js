@@ -2,12 +2,18 @@
 
 import { useState } from "react";
 
-// Lets a user manually drop specific rows out of an already search/filtered
+// Lets a user mark specific rows as excluded from an already search/filtered
 // list — e.g. searching "March" surfaces A-G, but C and F aren't actually
 // wanted this time. Purely client-side and purely visual: nothing is
-// deleted, nothing is persisted, it only hides rows from the current view.
-// Checkboxes only appear once "refining" is switched on, and every row
-// starts checked (visible) — unchecking one drops it out.
+// deleted, nothing is persisted, it only affects the current view's count
+// and whatever reads visibleRows (totals, export, screenshot).
+//
+// Every row keeps rendering the entire time refining is on — unchecking one
+// does NOT remove it from the table (it only used to, which was a dead end:
+// once every row was unticked, e.g. via Deselect All, there was nothing left
+// on screen to tick back). Only the *count*/export/total treats unticked
+// rows as excluded, so "Deselect All then pick the few I want" actually
+// works — every row stays clickable throughout.
 //
 // Resets whenever the underlying rows change (a new search/filter came back
 // from the server) — a stale hidden-row set from a previous search would
@@ -51,11 +57,17 @@ export function useRefineFilter(rows, getRowId) {
     setHiddenIds(new Set(rows.map(getRowId)));
   }
 
+  // The checked/included subset — feeds totals, export, and screenshot, but
+  // is deliberately NOT what the table iterates over to render rows (see
+  // displayRows below).
   const visibleRows = refining ? rows.filter((r) => !hiddenIds.has(getRowId(r))) : rows;
 
   return {
     refining,
     toggleRefining,
+    // Always the full row list — what the table actually renders, so every
+    // row (checked or not) stays visible and clickable while refining.
+    displayRows: rows,
     visibleRows,
     isChecked: (id) => !hiddenIds.has(id),
     toggleRow,
@@ -103,9 +115,7 @@ export function RefineToggleButton({
           >
             Deselect all
           </button>
-          <span>
-            {visibleCount} of {totalCount} shown — untick a row to drop it from this view
-          </span>
+          <span>{visibleCount} of {totalCount} selected — tick/untick rows to include or drop them</span>
         </>
       )}
     </div>

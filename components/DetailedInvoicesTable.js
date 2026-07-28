@@ -28,10 +28,8 @@ function formatDate(value) {
 }
 
 export function DetailedInvoicesTable({ invoices, clientId }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
-    invoices,
-    (inv) => inv.inv_id
-  );
+  const { refining, toggleRefining, displayRows, visibleRows, isChecked, toggleRow, selectAll, deselectAll } =
+    useRefineFilter(invoices, (inv) => inv.inv_id);
 
   // Archived/Cancelled invoices don't represent a real GST/TDS liability, so
   // they're excluded from the totals line entirely even though they still
@@ -92,10 +90,14 @@ export function DetailedInvoicesTable({ invoices, clientId }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {visibleRows.map((inv) => {
+            {displayRows.map((inv) => {
               const blanked = inv.lifecycle !== "Raised";
+              const excluded = refining && !isChecked(inv.inv_id);
               return (
-                <tr key={inv.inv_id} className={blanked ? "bg-gray-50" : "hover:bg-gray-50"}>
+                <tr
+                  key={inv.inv_id}
+                  className={`${blanked ? "bg-gray-50" : "hover:bg-gray-50"} ${excluded ? "opacity-40" : ""}`}
+                >
                   <td className="px-3 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
                     {refining && (
                       <input
@@ -167,15 +169,15 @@ export function DetailedInvoicesTable({ invoices, clientId }) {
                 </tr>
               );
             })}
-            {visibleRows.length === 0 && (
+            {invoices.length === 0 && (
               <tr>
                 <td colSpan={16} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {invoices.length === 0 ? "No invoices found." : "All rows refined out — untick some to bring them back."}
+                  No invoices found.
                 </td>
               </tr>
             )}
           </tbody>
-          {visibleRows.length > 0 && (
+          {invoices.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={5} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

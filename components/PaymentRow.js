@@ -42,7 +42,9 @@ export function PaymentRow({
   return (
     <>
       <tr
-        className={allocations.length > 0 ? "cursor-pointer hover:bg-gray-50" : "hover:bg-gray-50"}
+        className={`${allocations.length > 0 ? "cursor-pointer hover:bg-gray-50" : "hover:bg-gray-50"} ${
+          refining && !checked ? "opacity-40" : ""
+        }`}
         onClick={allocations.length > 0 ? () => setOpen((v) => !v) : undefined}
       >
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">

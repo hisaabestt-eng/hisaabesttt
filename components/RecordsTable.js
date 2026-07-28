@@ -26,10 +26,8 @@ export function RecordsTable({
   search,
   progress,
 }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
-    records,
-    (r) => r.record_id
-  );
+  const { refining, toggleRefining, displayRows, visibleRows, isChecked, toggleRow, selectAll, deselectAll } =
+    useRefineFilter(records, (r) => r.record_id);
 
   // Archived/Cancelled records don't represent real outstanding work, so
   // they're excluded from the subtotal — same convention as Detailed
@@ -69,7 +67,7 @@ export function RecordsTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {visibleRows.map((record) => {
+            {displayRows.map((record) => {
               const estimate = record.est_id ? allEstimates.find((e) => e.est_id === record.est_id) : null;
               const po = record.po_id ? allPOs.find((p) => p.po_id === record.po_id) : null;
               const invoices = narrowInvoicesToProgress(
@@ -101,15 +99,15 @@ export function RecordsTable({
                 />
               );
             })}
-            {visibleRows.length === 0 && (
+            {records.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {records.length === 0 ? "No records found." : "All rows refined out — untick some to bring them back."}
+                  No records found.
                 </td>
               </tr>
             )}
           </tbody>
-          {visibleRows.length > 0 && (
+          {records.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={3} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

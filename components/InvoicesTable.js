@@ -33,10 +33,8 @@ function formatDate(value) {
 // (need Node's fs, not available here) and passed in already computed, as
 // inv.docFileExists / inv.storedFileName.
 export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
-    invoices,
-    (inv) => inv.inv_id
-  );
+  const { refining, toggleRefining, displayRows, visibleRows, isChecked, toggleRow, selectAll, deselectAll } =
+    useRefineFilter(invoices, (inv) => inv.inv_id);
 
   const totalAmount = visibleRows.reduce(
     (sum, inv) => (inv.lifecycle === "Raised" ? sum + (Number(inv.invoice_total) || 0) : sum),
@@ -76,8 +74,11 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {visibleRows.map((inv) => (
-              <tr key={inv.inv_id} className="hover:bg-gray-50">
+            {displayRows.map((inv) => (
+              <tr
+                key={inv.inv_id}
+                className={`hover:bg-gray-50 ${refining && !isChecked(inv.inv_id) ? "opacity-40" : ""}`}
+              >
                 <td className="px-3 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">
                   {refining && (
                     <input
@@ -159,15 +160,15 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                 </td>
               </tr>
             ))}
-            {visibleRows.length === 0 && (
+            {invoices.length === 0 && (
               <tr>
                 <td colSpan={10} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {invoices.length === 0 ? "No invoices found." : "All rows refined out — untick some to bring them back."}
+                  No invoices found.
                 </td>
               </tr>
             )}
           </tbody>
-          {visibleRows.length > 0 && (
+          {invoices.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={4} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

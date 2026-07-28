@@ -35,36 +35,48 @@ function rowStatusText(row) {
 }
 
 export function MainTable({ rows, totalCount, search, progress }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
-    rows,
-    (row) => row.record_id
-  );
+  const {
+    refining,
+    toggleRefining,
+    displayRows,
+    visibleRows,
+    isChecked,
+    toggleRow,
+    selectAll,
+    deselectAll,
+  } = useRefineFilter(rows, (row) => row.record_id);
   const tableWrapperRef = useRef(null);
   const [exporting, setExporting] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const [exportError, setExportError] = useState("");
 
-  // The narrowed rows actually rendered on screen — same computation
-  // RecordSummaryRow gets below, kept here too so Excel/PNG exports match
-  // exactly what's visible instead of the pre-narrowed server data.
-  const narrowedRows = visibleRows.map((row) => ({
-    ...row,
-    invoices: narrowInvoicesToProgress(narrowInvoicesToSearch(row.invoices, search), progress),
-    allInvoices: row.invoices || [],
-  }));
+  function narrowRow(row) {
+    return {
+      ...row,
+      invoices: narrowInvoicesToProgress(narrowInvoicesToSearch(row.invoices, search), progress),
+      allInvoices: row.invoices || [],
+    };
+  }
 
-  const totalAmount = narrowedRows.reduce((sum, row) => sum + mainRowAmount(row), 0);
+  // Every row renders regardless of checked state (see useRefineFilter) —
+  // this is what the table body actually maps over.
+  const displayNarrowedRows = displayRows.map(narrowRow);
+  // Only the checked/included subset — what totals, Excel export, and the
+  // screenshot capture should reflect.
+  const checkedNarrowedRows = visibleRows.map(narrowRow);
+
+  const totalAmount = checkedNarrowedRows.reduce((sum, row) => sum + mainRowAmount(row), 0);
 
   async function handleExportExcel() {
     setExportError("");
-    if (narrowedRows.length === 0) {
+    if (checkedNarrowedRows.length === 0) {
       setExportError("Nothing to export for this filter.");
       return;
     }
     setExporting(true);
     try {
       const XLSX = await import("xlsx");
-      const sheetRows = narrowedRows.map((row) => ({
+      const sheetRows = checkedNarrowedRows.map((row) => ({
         "Record ID": row.record_id,
         Date: formatDate(row.estimate_date),
         Description: row.estimate_description,
@@ -144,7 +156,13 @@ export function MainTable({ rows, totalCount, search, progress }) {
       const thead = table.querySelector("thead");
       const tbody = table.querySelector("tbody");
       const tfoot = table.querySelector("tfoot");
-      const allRows = Array.from(tbody.children);
+      // Every row renders regardless of checked state (so refining stays
+      // usable), but the capture itself should still only include what's
+      // actually checked/included — otherwise a row unticked mid-refine
+      // would silently sneak back into the screenshot.
+      const allRows = Array.from(tbody.children).filter(
+        (row) => !refining || isChecked(row.dataset.recordId)
+      );
 
       const chunks = [];
       let current = [];
@@ -237,7 +255,7 @@ export function MainTable({ rows, totalCount, search, progress }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {narrowedRows.map((row) => (
+            {displayNarrowedRows.map((row) => (
               <RecordSummaryRow
                 key={row.record_id}
                 row={row}
@@ -246,15 +264,15 @@ export function MainTable({ rows, totalCount, search, progress }) {
                 onToggle={toggleRow}
               />
             ))}
-            {visibleRows.length === 0 && (
+            {rows.length === 0 && (
               <tr>
                 <td colSpan={4} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {rows.length === 0 ? "No records found." : "All rows refined out — untick some to bring them back."}
+                  No records found.
                 </td>
               </tr>
             )}
           </tbody>
-          {visibleRows.length > 0 && (
+          {rows.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={2} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

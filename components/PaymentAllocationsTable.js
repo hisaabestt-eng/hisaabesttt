@@ -13,10 +13,8 @@ function formatMoney(value) {
 }
 
 export function PaymentAllocationsTable({ invoices, canEdit }) {
-  const { refining, toggleRefining, visibleRows, isChecked, toggleRow, selectAll, deselectAll } = useRefineFilter(
-    invoices,
-    (inv) => inv.inv_id
-  );
+  const { refining, toggleRefining, displayRows, visibleRows, isChecked, toggleRow, selectAll, deselectAll } =
+    useRefineFilter(invoices, (inv) => inv.inv_id);
 
   const totals = visibleRows.reduce(
     (acc, inv) => {
@@ -57,7 +55,7 @@ export function PaymentAllocationsTable({ invoices, canEdit }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {visibleRows.map((inv) => (
+            {displayRows.map((inv) => (
               <InvoiceSummaryRow
                 key={inv.inv_id}
                 invoice={inv}
@@ -67,15 +65,15 @@ export function PaymentAllocationsTable({ invoices, canEdit }) {
                 onToggle={toggleRow}
               />
             ))}
-            {visibleRows.length === 0 && (
+            {invoices.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  {invoices.length === 0 ? "No invoices found." : "All rows refined out — untick some to bring them back."}
+                  No invoices found.
                 </td>
               </tr>
             )}
           </tbody>
-          {visibleRows.length > 0 && (
+          {invoices.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">Total (Raised only)</td>

@@ -170,7 +170,7 @@ export function InvoiceSummaryRow({
   return (
     <>
       <tr
-        className="cursor-pointer hover:bg-gray-50"
+        className={`cursor-pointer hover:bg-gray-50 ${refining && !checked ? "opacity-40" : ""}`}
         onClick={() => setOpen((v) => !v)}
       >
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
