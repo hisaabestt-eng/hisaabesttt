@@ -56,7 +56,7 @@ export default async function Home({ searchParams }) {
           </div>
           <ClientSelect clients={clients} compId={compId} clientId={clientId} />
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <ProgressFilter options={MAIN_PROGRESS_OPTIONS} selected={progress} />
           <YearFilter years={years} year={rawYear} yearType={yearType} from={from} to={to} />
           <ClearFiltersButton />
