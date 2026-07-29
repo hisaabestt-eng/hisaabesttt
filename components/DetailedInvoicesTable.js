@@ -169,15 +169,15 @@ export function DetailedInvoicesTable({ invoices, clientId }) {
                 </tr>
               );
             })}
-            {invoices.length === 0 && (
+            {displayRows.length === 0 && (
               <tr>
                 <td colSpan={16} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  No invoices found.
+                  {invoices.length === 0 ? "No invoices found." : "All rows refined out — click Refine list to adjust."}
                 </td>
               </tr>
             )}
           </tbody>
-          {invoices.length > 0 && (
+          {displayRows.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={5} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

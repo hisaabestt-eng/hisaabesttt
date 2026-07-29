@@ -94,15 +94,15 @@ export function EstimatesTable({
                 />
               );
             })}
-            {estimates.length === 0 && (
+            {displayRows.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  No estimates found.
+                  {estimates.length === 0 ? "No estimates found." : "All rows refined out — click Refine list to adjust."}
                 </td>
               </tr>
             )}
           </tbody>
-          {estimates.length > 0 && (
+          {displayRows.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={4} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

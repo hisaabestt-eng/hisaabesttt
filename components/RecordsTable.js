@@ -99,15 +99,15 @@ export function RecordsTable({
                 />
               );
             })}
-            {records.length === 0 && (
+            {displayRows.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
-                  No records found.
+                  {records.length === 0 ? "No records found." : "All rows refined out — click Refine list to adjust."}
                 </td>
               </tr>
             )}
           </tbody>
-          {records.length > 0 && (
+          {displayRows.length > 0 && (
             <tfoot className="sticky bottom-0 border-t-2 border-gray-200 bg-gray-50 font-medium dark:border-gray-700 dark:bg-gray-900/40">
               <tr>
                 <td colSpan={3} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">

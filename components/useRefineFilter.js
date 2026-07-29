@@ -2,18 +2,21 @@
 
 import { useState } from "react";
 
-// Lets a user mark specific rows as excluded from an already search/filtered
-// list — e.g. searching "March" surfaces A-G, but C and F aren't actually
-// wanted this time. Purely client-side and purely visual: nothing is
-// deleted, nothing is persisted, it only affects the current view's count
-// and whatever reads visibleRows (totals, export, screenshot).
+// Lets a user narrow an already search/filtered list down to just the rows
+// they tick — e.g. searching "March" surfaces A-G, but only C and F are
+// actually wanted this time. Purely client-side and purely visual: nothing
+// is deleted, nothing is persisted.
 //
-// Every row keeps rendering the entire time refining is on — unchecking one
-// does NOT remove it from the table (it only used to, which was a dead end:
-// once every row was unticked, e.g. via Deselect All, there was nothing left
-// on screen to tick back). Only the *count*/export/total treats unticked
-// rows as excluded, so "Deselect All then pick the few I want" actually
-// works — every row stays clickable throughout.
+// Two distinct phases:
+//   - Editing ("Refine list" clicked, refining=true): every row stays on
+//     screen — including unticked ones, shown dimmed — so Deselect All then
+//     ticking back just the few you want actually works (unticking used to
+//     remove a row outright, which was a dead end: once everything was
+//     unticked there was nothing left on screen to tick back in).
+//   - Applied ("Done refining" clicked, refining=false): the table narrows
+//     down to just the ticked rows and *stays* narrowed — that's the whole
+//     point of refining. Clicking "Refine list" again re-opens editing with
+//     every row visible again, so the selection can be adjusted further.
 //
 // Resets whenever the underlying rows change (a new search/filter came back
 // from the server) — a stale hidden-row set from a previous search would
@@ -42,9 +45,11 @@ export function useRefineFilter(rows, getRowId) {
     });
   }
 
+  // Only flips the edit/applied phase — the ticked set itself carries over
+  // in both directions, so "Done refining" applies whatever was just picked
+  // instead of discarding it.
   function toggleRefining() {
     setRefining((v) => !v);
-    setHiddenIds(new Set());
   }
 
   // Gmail-style "select all" / "select none" — much faster than unticking
@@ -57,17 +62,16 @@ export function useRefineFilter(rows, getRowId) {
     setHiddenIds(new Set(rows.map(getRowId)));
   }
 
-  // The checked/included subset — feeds totals, export, and screenshot, but
-  // is deliberately NOT what the table iterates over to render rows (see
-  // displayRows below).
-  const visibleRows = refining ? rows.filter((r) => !hiddenIds.has(getRowId(r))) : rows;
+  // The checked/included subset — feeds totals, export, screenshot, and
+  // (once refining is turned off) the table itself.
+  const visibleRows = rows.filter((r) => !hiddenIds.has(getRowId(r)));
 
   return {
     refining,
     toggleRefining,
-    // Always the full row list — what the table actually renders, so every
-    // row (checked or not) stays visible and clickable while refining.
-    displayRows: rows,
+    // What the table actually renders: everything while adjusting the
+    // selection, just the ticked subset once it's applied.
+    displayRows: refining ? rows : visibleRows,
     visibleRows,
     isChecked: (id) => !hiddenIds.has(id),
     toggleRow,
