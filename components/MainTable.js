@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
+import { ProgressFilter, ClearFiltersButton } from "./MainFilterBar";
 import { narrowInvoicesToSearch, narrowInvoicesToProgress } from "@/lib/searchNarrow";
 import { progressLabel, mainRowAmount } from "@/lib/status";
 import { RecordSummaryRow } from "./RecordSummaryRow";
@@ -34,7 +35,7 @@ function rowStatusText(row) {
   return row.status;
 }
 
-export function MainTable({ rows, totalCount, search, progress }) {
+export function MainTable({ rows, totalCount, search, progress, progressOptions }) {
   const {
     refining,
     toggleRefining,
@@ -209,6 +210,8 @@ export function MainTable({ rows, totalCount, search, progress }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-sm text-gray-600 dark:text-gray-400">{totalCount} records</div>
         <div className="flex flex-wrap items-center gap-2">
+          <ProgressFilter options={progressOptions} selected={progress} />
+          <ClearFiltersButton />
           <button
             type="button"
             onClick={handleExportExcel}

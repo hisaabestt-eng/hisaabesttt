@@ -335,7 +335,7 @@ export function EnteredTodayButton() {
   );
 }
 
-export function SearchBox({ search, large = false }) {
+export function SearchBox({ search }) {
   const router = useRouter();
   const pathname = usePathname();
   const timerRef = useRef(null);
@@ -358,9 +358,7 @@ export function SearchBox({ search, large = false }) {
       defaultValue={search}
       onChange={handleChange}
       placeholder="Search"
-      className={`w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 ${
-        large ? "px-4 py-2.5 text-base" : "px-2 py-1.5 text-sm"
-      }`}
+      className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
     />
   );
 }
