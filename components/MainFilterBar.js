@@ -222,9 +222,20 @@ export function ProgressFilter({ options, selected }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="min-w-[140px] rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600"
+        className="flex min-w-[140px] items-center justify-between gap-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-600"
       >
-        Progress{selected.length > 0 ? ` (${selected.length})` : ""}
+        <span>Progress{selected.length > 0 ? ` (${selected.length})` : ""}</span>
+        <svg
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className={`h-4 w-4 flex-shrink-0 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+        >
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.24 4.5a.75.75 0 0 1-1.08 0l-4.24-4.5a.75.75 0 0 1 .02-1.06Z"
+          />
+        </svg>
       </button>
 
       {open && (
@@ -324,7 +335,7 @@ export function EnteredTodayButton() {
   );
 }
 
-export function SearchBox({ search }) {
+export function SearchBox({ search, large = false }) {
   const router = useRouter();
   const pathname = usePathname();
   const timerRef = useRef(null);
@@ -347,7 +358,9 @@ export function SearchBox({ search }) {
       defaultValue={search}
       onChange={handleChange}
       placeholder="Search"
-      className="w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 px-2 py-1.5 text-sm"
+      className={`w-full rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 ${
+        large ? "px-4 py-2.5 text-base" : "px-2 py-1.5 text-sm"
+      }`}
     />
   );
 }
