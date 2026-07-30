@@ -114,6 +114,20 @@ export function POSummaryRow({
         <tr>
           <td colSpan={10} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <div className="grid grid-cols-3 gap-3 border-b border-gray-100 px-3 py-2.5 dark:border-gray-700">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Estimate Date</div>
+                  <div className="text-sm text-gray-700 dark:text-gray-300">{formatDate(po.estimate_date)}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Estimate No</div>
+                  <div className="text-sm text-gray-700 dark:text-gray-300">{po.est_no || "—"}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Estimate Description</div>
+                  <div className="text-sm text-gray-700 dark:text-gray-300">{po.estimate_description || "—"}</div>
+                </div>
+              </div>
               <div className="border-b border-gray-100 px-3 py-2.5 dark:border-gray-700">
                 <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Tags</div>
                 <EstimateTagsEditor estId={po.est_id} initialTags={parseTags(po.estimate_tags)} />

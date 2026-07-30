@@ -10,6 +10,7 @@ import {
 import { EditInvoiceButton, DeleteInvoiceButton } from "./InvoiceModal";
 import { DocumentPreviewLink } from "./DocumentPreview";
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
+import InvoiceChainButton from "./InvoiceChainModal";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -90,7 +91,9 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                   )}
                   {inv.record_id}
                 </td>
-                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{inv.invoice_no}</td>
+                <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+                  <InvoiceChainButton invoiceNo={inv.invoice_no} />
+                </td>
                 <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(inv.invoice_date)}</td>
                 <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{inv.description}</td>
                 <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
