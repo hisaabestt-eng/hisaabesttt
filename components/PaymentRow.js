@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { progressLabel, progressStyle } from "@/lib/status";
 import { AllocatePaymentButton, EditPaymentButton, DeletePaymentButton } from "./PaymentModal";
+import InvoiceChainButton from "./InvoiceChainModal";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -94,7 +95,9 @@ export function PaymentRow({
                 <tbody className="divide-y divide-gray-100">
                   {allocations.map((a) => (
                     <tr key={a.invoice_no}>
-                      <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{a.invoice_no}</td>
+                      <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
+                        <InvoiceChainButton invoiceNo={a.invoice_no} />
+                      </td>
                       <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
                         {formatMoney(a.amount)}
                       </td>
