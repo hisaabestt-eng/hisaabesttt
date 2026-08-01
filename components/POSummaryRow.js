@@ -4,7 +4,7 @@ import { useState } from "react";
 import { lifecycleDisplay } from "@/lib/status";
 import { parseTags } from "@/lib/tags";
 import { EditPOButton, DeletePOButton } from "./POModal";
-import { DocumentPreviewLink } from "./DocumentPreview";
+import { EntityDocLink } from "./DocumentPreview";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 import { EstimateTagsEditor } from "./EstimateTagsEditor";
 
@@ -61,7 +61,17 @@ export function POSummaryRow({
           <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
           {po.record_id}
         </td>
-        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{po.po_no}</td>
+        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+          <EntityDocLink
+            label={po.po_no}
+            externalUrl={po.external_url}
+            docId={po.doc_id}
+            docFileExists={docFileExists}
+            fileName={po.file_name}
+            href={`/uploads/purchase-order/${po.po_id}-${po.file_name}`}
+            className="text-gray-700 underline decoration-dotted hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+          />
+        </td>
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(po.po_date)}</td>
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{po.description}</td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(po.amount)}</td>
@@ -72,31 +82,6 @@ export function POSummaryRow({
           }`}
         >
           {formatMoney(po.invoice_balance)}
-        </td>
-        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-          {po.external_url ? (
-            <DocumentPreviewLink
-              href={po.external_url}
-              externalUrl={po.external_url}
-              className="text-xs text-blue-600 underline"
-            >
-              🔗 External Link
-            </DocumentPreviewLink>
-          ) : po.doc_id && docFileExists ? (
-            <DocumentPreviewLink
-              href={`/uploads/purchase-order/${po.po_id}-${po.file_name}`}
-              fileName={po.file_name}
-              className="text-xs text-blue-600 underline"
-            >
-              📎 {po.file_name}
-            </DocumentPreviewLink>
-          ) : po.doc_id ? (
-            <span className="text-xs text-gray-400" title="Uploaded before file storage was set up">
-              📎 {po.file_name} (no file)
-            </span>
-          ) : (
-            <span className="text-xs text-gray-400">No document</span>
-          )}
         </td>
         <td className="px-3 py-3 text-center">
           <span className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${lifecycleDisplay(po).style}`}>
@@ -112,7 +97,7 @@ export function POSummaryRow({
       </tr>
       {open && (
         <tr>
-          <td colSpan={10} className="bg-gray-50 p-3 dark:bg-gray-900/40">
+          <td colSpan={9} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <div className="grid grid-cols-3 gap-3 border-b border-gray-100 px-3 py-2.5 dark:border-gray-700">
                 <div>

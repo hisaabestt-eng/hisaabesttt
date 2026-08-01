@@ -8,7 +8,6 @@ import {
   invoiceDisplayStatus,
 } from "@/lib/status";
 import { EditInvoiceButton, DeleteInvoiceButton } from "./InvoiceModal";
-import { DocumentPreviewLink } from "./DocumentPreview";
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
 import InvoiceChainButton from "./InvoiceChainModal";
 
@@ -68,7 +67,6 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
               </th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Invoice Amount</th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Total</th>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Document</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Progress</th>
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
@@ -101,31 +99,6 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                 </td>
                 <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
                   {formatMoney(inv.invoice_total)}
-                </td>
-                <td className="px-3 py-3">
-                  {inv.external_url ? (
-                    <DocumentPreviewLink
-                      href={inv.external_url}
-                      externalUrl={inv.external_url}
-                      className="text-xs text-blue-600 underline"
-                    >
-                      🔗 External Link
-                    </DocumentPreviewLink>
-                  ) : inv.doc_id && inv.docFileExists ? (
-                    <DocumentPreviewLink
-                      href={`/uploads/invoice/${inv.storedFileName}`}
-                      fileName={inv.file_name}
-                      className="text-xs text-blue-600 underline"
-                    >
-                      📎 {inv.file_name}
-                    </DocumentPreviewLink>
-                  ) : inv.doc_id ? (
-                    <span className="text-xs text-gray-400" title="Uploaded before file storage was set up">
-                      📎 {inv.file_name} (no file)
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-400">No document</span>
-                  )}
                 </td>
                 <td className="px-3 py-3 text-center">
                   <span
@@ -165,7 +138,7 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
             ))}
             {displayRows.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={9} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   {invoices.length === 0 ? "No invoices found." : "All rows refined out — click Refine list to adjust."}
                 </td>
               </tr>
@@ -179,7 +152,7 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                 </td>
                 <td></td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totalAmount)}</td>
-                <td colSpan={4}></td>
+                <td colSpan={3}></td>
               </tr>
             </tfoot>
           )}

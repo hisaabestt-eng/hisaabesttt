@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DocumentPreviewLink } from "./DocumentPreview";
 
 function formatDate(value) {
   if (!value) return "—";
@@ -11,11 +12,39 @@ function formatDate(value) {
   });
 }
 
+function docHref(document) {
+  if (!document) return null;
+  return document.external_url || document.publicPath || null;
+}
+
 function Field({ label, value }) {
   return (
     <div>
       <div className="text-xs font-medium uppercase tracking-wide text-gray-400">{label}</div>
       <div className="text-sm text-gray-800 dark:text-gray-200">{value}</div>
+    </div>
+  );
+}
+
+function DocumentField({ document }) {
+  const href = docHref(document);
+  return (
+    <div>
+      <div className="text-xs font-medium uppercase tracking-wide text-gray-400">Document</div>
+      {href ? (
+        <DocumentPreviewLink
+          href={href}
+          fileName={document?.file_name}
+          externalUrl={document?.external_url}
+          className="text-sm text-blue-600 underline"
+        >
+          {document.external_url ? "External Link" : document.file_name}
+        </DocumentPreviewLink>
+      ) : (
+        <div className="text-sm text-gray-400">
+          {document?.doc_id ? "Uploaded before file storage was set up — no file to preview." : "No document attached."}
+        </div>
+      )}
     </div>
   );
 }
@@ -82,10 +111,12 @@ export default function InvoiceChainButton({ invoiceNo }) {
                   <Field label="PO Number" value={detail.poNo || "—"} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 border-b pb-3">
                   <Field label="Invoice Date" value={formatDate(detail.invoiceDate)} />
                   <Field label="Invoice No" value={detail.invoiceNo || "—"} />
                 </div>
+
+                <DocumentField document={detail.document} />
               </div>
             )}
 

@@ -59,7 +59,6 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, sea
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Amount</th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Invoiced</th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Balance to Invoice</th>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Document</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
@@ -83,7 +82,7 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, sea
             ))}
             {displayRows.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={9} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   {purchaseOrders.length === 0
                     ? "No purchase orders found."
                     : "All rows refined out — click Refine list to adjust."}
@@ -100,7 +99,7 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, sea
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.amount)}</td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.invoiced)}</td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totals.balance)}</td>
-                <td colSpan={3}></td>
+                <td colSpan={2}></td>
               </tr>
             </tfoot>
           )}

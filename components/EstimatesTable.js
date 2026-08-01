@@ -60,7 +60,6 @@ export function EstimatesTable({
                 Description
               </th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Amount</th>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Document</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
               <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
@@ -96,7 +95,7 @@ export function EstimatesTable({
             })}
             {displayRows.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={7} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   {estimates.length === 0 ? "No estimates found." : "All rows refined out — click Refine list to adjust."}
                 </td>
               </tr>
@@ -109,7 +108,7 @@ export function EstimatesTable({
                   Total (Raised only)
                 </td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totalAmount)}</td>
-                <td colSpan={3}></td>
+                <td colSpan={2}></td>
               </tr>
             </tfoot>
           )}

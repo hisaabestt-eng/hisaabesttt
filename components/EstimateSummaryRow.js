@@ -5,7 +5,7 @@ import { lifecycleDisplay } from "@/lib/status";
 import { parseTags } from "@/lib/tags";
 import { EditEstimateButton, DeleteEstimateButton } from "./EstimateModal";
 import { EditPOButton, DeletePOButton } from "./POModal";
-import { DocumentPreviewLink } from "./DocumentPreview";
+import { EntityDocLink } from "./DocumentPreview";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 import { EstimateTagsEditor } from "./EstimateTagsEditor";
 
@@ -73,35 +73,20 @@ export function EstimateSummaryRow({
           <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
           {est.record_id}
         </td>
-        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{est.est_no}</td>
+        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+          <EntityDocLink
+            label={est.est_no}
+            externalUrl={est.external_url}
+            docId={est.doc_id}
+            docFileExists={docFileExists}
+            fileName={est.file_name}
+            href={`/uploads/estimates/${est.est_id}-${est.file_name}`}
+            className="text-gray-700 underline decoration-dotted hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+          />
+        </td>
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(est.estimate_date)}</td>
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{est.description}</td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(est.amount)}</td>
-        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-          {est.external_url ? (
-            <DocumentPreviewLink
-              href={est.external_url}
-              externalUrl={est.external_url}
-              className="text-xs text-blue-600 underline"
-            >
-              🔗 External Link
-            </DocumentPreviewLink>
-          ) : est.doc_id && docFileExists ? (
-            <DocumentPreviewLink
-              href={`/uploads/estimates/${est.est_id}-${est.file_name}`}
-              fileName={est.file_name}
-              className="text-xs text-blue-600 underline"
-            >
-              📎 {est.file_name}
-            </DocumentPreviewLink>
-          ) : est.doc_id ? (
-            <span className="text-xs text-gray-400" title="Uploaded before file storage was set up">
-              📎 {est.file_name} (no file)
-            </span>
-          ) : (
-            <span className="text-xs text-gray-400">No document</span>
-          )}
-        </td>
         <td className="px-3 py-3 text-center">
           <span
             className={`inline-flex min-w-[120px] items-center justify-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${lifecycleDisplay(est).style}`}
@@ -118,7 +103,7 @@ export function EstimateSummaryRow({
       </tr>
       {open && (
         <tr>
-          <td colSpan={8} className="bg-gray-50 p-3 dark:bg-gray-900/40">
+          <td colSpan={7} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <div className="border-b border-gray-100 px-3 py-2.5 dark:border-gray-700">
                 <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">Tags</div>

@@ -197,3 +197,65 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
     </>
   );
 }
+
+// A list row's own number (Est No / PO No / Invoice No) doubles as the
+// document link — no separate Document column. Clicking it previews the
+// document when one's attached; otherwise it shows a small "not attached"
+// notice instead of doing nothing, so the click always gives feedback.
+export function EntityDocLink({ label, externalUrl, docId, docFileExists, fileName, href, className }) {
+  const [showNotice, setShowNotice] = useState(false);
+
+  if (externalUrl) {
+    return (
+      <DocumentPreviewLink href={externalUrl} externalUrl={externalUrl} className={className}>
+        {label}
+      </DocumentPreviewLink>
+    );
+  }
+  if (docId && docFileExists) {
+    return (
+      <DocumentPreviewLink href={href} fileName={fileName} className={className}>
+        {label}
+      </DocumentPreviewLink>
+    );
+  }
+
+  const note = docId
+    ? "This document was uploaded before file storage was set up, so there's no file to preview."
+    : "No document attached.";
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowNotice(true);
+        }}
+        className={className}
+      >
+        {label}
+      </button>
+      {showNotice && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowNotice(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-lg bg-white dark:bg-gray-800 p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm text-gray-700 dark:text-gray-300">{note}</p>
+            <button
+              type="button"
+              onClick={() => setShowNotice(false)}
+              className="mt-4 text-xs text-blue-600 underline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
