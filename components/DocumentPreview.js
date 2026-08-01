@@ -34,7 +34,11 @@ function previewKind({ externalUrl, fileName }) {
     }
     const sheetsId = sheetsIdFromUrl(externalUrl);
     if (sheetsId) {
-      return { kind: "iframe", src: `https://docs.google.com/spreadsheets/d/${sheetsId}/preview` };
+      // Sheets' own /preview embed intermittently throws a generic "Google
+      // Docs encountered an error" — /htmlview is the same read-only
+      // embed Google itself documents for iframing a sheet and is far
+      // more reliable in practice.
+      return { kind: "iframe", src: `https://docs.google.com/spreadsheets/d/${sheetsId}/htmlview` };
     }
     return { kind: "none" };
   }
