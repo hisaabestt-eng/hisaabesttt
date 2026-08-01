@@ -70,7 +70,7 @@ export function PaymentRow({
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(py.balance)}</td>
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{py.remarks || "—"}</td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2">
             {canEdit && <AllocatePaymentButton payment={py} outstandingInvoices={outstandingInvoices} />}
             {(canEdit || canDelete) && (
               <ActionsMenu>

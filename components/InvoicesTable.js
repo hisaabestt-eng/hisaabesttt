@@ -70,7 +70,7 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Total</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
               <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Progress</th>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
+              <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -127,7 +127,7 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-3">
+                <td className="px-3 py-3 text-center">
                   {(canEdit || (canDelete && inv.status !== "Paid" && inv.status !== "Partial Paid")) && (
                     <ActionsMenu>
                       {canEdit && <EditInvoiceButton invoice={inv} statusLabels={statusLabels} />}

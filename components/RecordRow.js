@@ -94,7 +94,7 @@ export function RecordRow({
             {lifecycleDisplay(record).label}
           </span>
         </td>
-        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+        <td className="px-3 py-3 text-center" onClick={(e) => e.stopPropagation()}>
           {(canEdit || (canDelete && !record.est_id)) && (
             <ActionsMenu>
               {canEdit && <EditRecordButton record={record} statusLabels={statusLabels} />}

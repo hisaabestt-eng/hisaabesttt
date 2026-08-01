@@ -49,7 +49,7 @@ export function PaymentsTable({ payments, outstandingInvoices, canEdit, canDelet
               <th className="min-w-[220px] px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                 Remarks
               </th>
-              <th className="px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">Actions</th>
+              <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-700">

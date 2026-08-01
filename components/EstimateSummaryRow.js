@@ -95,7 +95,7 @@ export function EstimateSummaryRow({
             {lifecycleDisplay(est).label}
           </span>
         </td>
-        <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+        <td className="px-3 py-3 text-center" onClick={(e) => e.stopPropagation()}>
           {(canEdit || (canDelete && !est.po_id)) && (
             <ActionsMenu>
               {canEdit && <EditEstimateButton estimate={est} statusLabels={statusLabels} />}
