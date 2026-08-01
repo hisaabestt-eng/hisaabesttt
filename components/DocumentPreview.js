@@ -40,6 +40,10 @@ function previewKind({ externalUrl, fileName }) {
   return { kind: "none" };
 }
 
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 1.2;
+const ZOOM_STEP = 0.1;
+
 // Wraps a document link so PDFs, images, and Excel files open in an inline
 // preview modal instead of forcing a new tab — Word/other types still just
 // open in a new tab via the normal <a> behavior.
@@ -48,7 +52,13 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
   const [tableHtml, setTableHtml] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Spreadsheets tend to have many columns that don't fit a fixed-width
+  // modal — a wider modal plus a default zoomed-out view (both the Sheets
+  // iframe and the parsed-table view) shows more of the sheet at once
+  // instead of forcing horizontal scrolling for every row.
+  const [zoom, setZoom] = useState(0.8);
   const info = previewKind({ externalUrl, fileName });
+  const isSpreadsheet = info.kind === "excel" || (info.kind === "iframe" && info.src?.includes("spreadsheets"));
 
   async function handleClick(e) {
     if (info.kind === "none") return;
@@ -89,12 +99,44 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
           onClick={() => setOpen(false)}
         >
           <div
-            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl"
+            className={`flex max-h-[90vh] w-full flex-col overflow-hidden rounded-lg bg-white dark:bg-gray-800 shadow-xl ${
+              isSpreadsheet ? "max-w-6xl" : "max-w-3xl"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b px-4 py-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Preview</span>
               <div className="flex items-center gap-3">
+                {isSpreadsheet && (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setZoom((z) => Math.max(ZOOM_MIN, +(z - ZOOM_STEP).toFixed(2)))}
+                      disabled={zoom <= ZOOM_MIN}
+                      className="rounded border border-gray-300 px-1.5 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                      title="Zoom out"
+                    >
+                      −
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setZoom(1)}
+                      className="w-10 text-center text-xs text-gray-500 hover:underline dark:text-gray-400"
+                      title="Reset zoom"
+                    >
+                      {Math.round(zoom * 100)}%
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setZoom((z) => Math.min(ZOOM_MAX, +(z + ZOOM_STEP).toFixed(2)))}
+                      disabled={zoom >= ZOOM_MAX}
+                      className="rounded border border-gray-300 px-1.5 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                      title="Zoom in"
+                    >
+                      +
+                    </button>
+                  </div>
+                )}
                 <a
                   href={href}
                   target="_blank"
@@ -113,7 +155,21 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
               </div>
             </div>
             <div className="flex-1 overflow-auto bg-gray-50">
-              {info.kind === "iframe" && (
+              {info.kind === "iframe" && isSpreadsheet && (
+                <div className="h-[75vh] overflow-auto">
+                  <div
+                    style={{
+                      width: `${100 / zoom}%`,
+                      height: `${100 / zoom}%`,
+                      transform: `scale(${zoom})`,
+                      transformOrigin: "top left",
+                    }}
+                  >
+                    <iframe src={info.src} className="h-full w-full border-0" title="Document preview" />
+                  </div>
+                </div>
+              )}
+              {info.kind === "iframe" && !isSpreadsheet && (
                 <iframe src={info.src || href} className="h-[75vh] w-full" title="Document preview" />
               )}
               {info.kind === "image" && (
@@ -124,10 +180,13 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
                   {loading && <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>}
                   {error && <p className="text-sm text-red-600">{error}</p>}
                   {tableHtml && (
-                    <div
-                      className="overflow-x-auto text-xs [&_table]:border-collapse [&_td]:border [&_td]:border-gray-200 [&_td]:px-2 [&_td]:py-1"
-                      dangerouslySetInnerHTML={{ __html: tableHtml }}
-                    />
+                    <div className="overflow-x-auto">
+                      <div
+                        style={{ transform: `scale(${zoom})`, transformOrigin: "top left", width: "fit-content" }}
+                        className="text-xs [&_table]:border-collapse [&_td]:border [&_td]:border-gray-200 [&_td]:px-2 [&_td]:py-1"
+                        dangerouslySetInnerHTML={{ __html: tableHtml }}
+                      />
+                    </div>
                   )}
                 </div>
               )}
