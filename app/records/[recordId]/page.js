@@ -2,7 +2,7 @@ import { existsSync } from "fs";
 import path from "path";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRecordById, getRecordsWithoutEstimate } from "@/lib/recordsAdmin";
+import { getRecordById, getRecordsWithoutEstimate, getAdjacentRecordIds } from "@/lib/recordsAdmin";
 import { listEstimates, getSuggestedEstNosByClient } from "@/lib/estimatesAdmin";
 import { listPOs, getEstimatesWithoutPO } from "@/lib/poAdmin";
 import { listInvoices, getPOsForPicker, getEstimatesForDirectInvoicePicker } from "@/lib/invoicesAdmin";
@@ -134,6 +134,7 @@ export default async function RecordDetailPage({ params }) {
     posForPicker,
     estimatesForDirectInvoicePicker,
     suggestedEstNosByClient,
+    adjacent,
   ] = await Promise.all([
     getServerSession(),
     getPermissions(),
@@ -149,6 +150,7 @@ export default async function RecordDetailPage({ params }) {
     getPOsForPicker(compId, clientId),
     getEstimatesForDirectInvoicePicker(compId, clientId),
     getSuggestedEstNosByClient(compId),
+    getAdjacentRecordIds(recordId, compId, clientId),
   ]);
 
   const canAdd = session.role === "admin" || permissions.can_add;
@@ -172,12 +174,30 @@ export default async function RecordDetailPage({ params }) {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
-      <Link
-        href={`/estimates?tab=records&company=${record.comp_id}&client=${record.client_id}`}
-        className="text-sm text-blue-600 underline"
-      >
-        ← Back to Records
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          href={`/estimates?tab=records&company=${record.comp_id}&client=${record.client_id}`}
+          className="text-sm text-blue-600 underline"
+        >
+          ← Back to Records
+        </Link>
+        <div className="flex items-center gap-3 text-sm">
+          {adjacent.prevId ? (
+            <Link href={`/records/${adjacent.prevId}`} className="text-blue-600 underline">
+              ← Previous
+            </Link>
+          ) : (
+            <span className="text-gray-300 dark:text-gray-600">← Previous</span>
+          )}
+          {adjacent.nextId ? (
+            <Link href={`/records/${adjacent.nextId}`} className="text-blue-600 underline">
+              Next →
+            </Link>
+          ) : (
+            <span className="text-gray-300 dark:text-gray-600">Next →</span>
+          )}
+        </div>
+      </div>
 
       <div className="flex items-start justify-between gap-3">
         <div>
