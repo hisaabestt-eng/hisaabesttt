@@ -1,7 +1,7 @@
 "use client";
 
 import { LIFECYCLE_STYLES, progressLabel, progressStyle } from "@/lib/status";
-import InvoiceChainButton from "./InvoiceChainModal";
+import { LazyEntityDocLink } from "./DocumentPreview";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -47,7 +47,11 @@ export function InvoiceBreakdownTable({ invoices, emptyMessage, pendingAmount = 
         {invoices.map((inv) => (
           <tr key={inv.inv_id}>
             <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
-              <InvoiceChainButton invoiceNo={inv.invoice_no} />
+              <LazyEntityDocLink
+                label={inv.invoice_no}
+                fetchUrl={`/api/invoices/${inv.invoice_no}/document`}
+                className="text-left text-gray-700 underline decoration-dotted hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+              />
             </td>
             <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{formatDate(inv.invoice_date)}</td>
             <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">

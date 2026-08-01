@@ -4,6 +4,7 @@ import { useState } from "react";
 import { progressLabel, progressStyle } from "@/lib/status";
 import { AllocatePaymentButton, EditPaymentButton, DeletePaymentButton } from "./PaymentModal";
 import InvoiceChainButton from "./InvoiceChainModal";
+import { ActionsMenu } from "./ActionsMenu";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -69,10 +70,14 @@ export function PaymentRow({
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(py.balance)}</td>
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{py.remarks || "—"}</td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-          <div className="flex gap-2">
-            {canEdit && <EditPaymentButton payment={py} />}
+          <div className="flex items-center gap-2">
             {canEdit && <AllocatePaymentButton payment={py} outstandingInvoices={outstandingInvoices} />}
-            {canDelete && <DeletePaymentButton pyId={py.py_id} />}
+            {(canEdit || canDelete) && (
+              <ActionsMenu>
+                {canEdit && <EditPaymentButton payment={py} />}
+                {canDelete && <DeletePaymentButton pyId={py.py_id} />}
+              </ActionsMenu>
+            )}
           </div>
         </td>
       </tr>

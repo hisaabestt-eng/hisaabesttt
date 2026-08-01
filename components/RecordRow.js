@@ -10,6 +10,7 @@ import { EditPOButton, DeletePOButton } from "./POModal";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 import { EstimateTagsEditor } from "./EstimateTagsEditor";
 import { EntityDocLink } from "./DocumentPreview";
+import { ActionsMenu } from "./ActionsMenu";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -94,10 +95,12 @@ export function RecordRow({
           </span>
         </td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-          <div className="flex gap-2">
-            {canEdit && <EditRecordButton record={record} statusLabels={statusLabels} />}
-            {canDelete && !record.est_id && <DeleteRecordButton recordId={record.record_id} />}
-          </div>
+          {(canEdit || (canDelete && !record.est_id)) && (
+            <ActionsMenu>
+              {canEdit && <EditRecordButton record={record} statusLabels={statusLabels} />}
+              {canDelete && !record.est_id && <DeleteRecordButton recordId={record.record_id} />}
+            </ActionsMenu>
+          )}
         </td>
       </tr>
       {open && (

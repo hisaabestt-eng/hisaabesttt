@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function driveIdFromUrl(url) {
   const m = url.match(/\/file\/d\/([^/]+)/);
@@ -14,6 +14,11 @@ function sheetsIdFromUrl(url) {
 
 function getExt(fileName) {
   return (fileName || "").split(".").pop()?.toLowerCase() || "";
+}
+
+function docHref(document) {
+  if (!document) return null;
+  return document.external_url || document.publicPath || null;
 }
 
 // Decides how a document can be shown inline instead of just opening a new
@@ -47,8 +52,8 @@ const ZOOM_STEP = 0.1;
 // Wraps a document link so PDFs, images, and Excel files open in an inline
 // preview modal instead of forcing a new tab — Word/other types still just
 // open in a new tab via the normal <a> behavior.
-export function DocumentPreviewLink({ href, fileName, externalUrl, children, className }) {
-  const [open, setOpen] = useState(false);
+export function DocumentPreviewLink({ href, fileName, externalUrl, children, className, autoOpen = false }) {
+  const [open, setOpen] = useState(autoOpen);
   const [tableHtml, setTableHtml] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -60,24 +65,35 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
   const info = previewKind({ externalUrl, fileName });
   const isSpreadsheet = info.kind === "excel" || (info.kind === "iframe" && info.src?.includes("spreadsheets"));
 
+  async function loadExcelPreview() {
+    setLoading(true);
+    setError("");
+    try {
+      const XLSX = await import("xlsx");
+      const res = await fetch(href);
+      const buf = await res.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const html = XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
+      setTableHtml(html);
+    } catch {
+      setError("Could not load this spreadsheet for preview.");
+    }
+    setLoading(false);
+  }
+
+  // autoOpen skips the click that would normally trigger the Excel fetch —
+  // load it once on mount instead.
+  useEffect(() => {
+    if (autoOpen && info.kind === "excel") loadExcelPreview();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function handleClick(e) {
     if (info.kind === "none") return;
     e.preventDefault();
     setOpen(true);
     if (info.kind === "excel" && !tableHtml) {
-      setLoading(true);
-      setError("");
-      try {
-        const XLSX = await import("xlsx");
-        const res = await fetch(href);
-        const buf = await res.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array" });
-        const html = XLSX.utils.sheet_to_html(wb.Sheets[wb.SheetNames[0]]);
-        setTableHtml(html);
-      } catch {
-        setError("Could not load this spreadsheet for preview.");
-      }
-      setLoading(false);
+      await loadExcelPreview();
     }
   }
 
@@ -234,6 +250,79 @@ export function EntityDocLink({ label, externalUrl, docId, docFileExists, fileNa
         }}
         className={className}
       >
+        {label}
+      </button>
+      {showNotice && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setShowNotice(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-lg bg-white dark:bg-gray-800 p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm text-gray-700 dark:text-gray-300">{note}</p>
+            <button
+              type="button"
+              onClick={() => setShowNotice(false)}
+              className="mt-4 text-xs text-blue-600 underline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// Same idea as EntityDocLink, for callers that don't have the document data
+// on hand synchronously (e.g. an invoice number inside a nested table, where
+// plumbing docFileExists through every parent's props isn't practical) —
+// fetches the document from `fetchUrl` on first click instead.
+export function LazyEntityDocLink({ label, fetchUrl, className }) {
+  const [resolved, setResolved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [document, setDocument] = useState(null);
+  const [showNotice, setShowNotice] = useState(false);
+
+  async function handleClick(e) {
+    e.stopPropagation();
+    if (resolved) {
+      if (!docHref(document)) setShowNotice(true);
+      return;
+    }
+    setLoading(true);
+    const res = await fetch(fetchUrl);
+    const data = await res.json();
+    setDocument(data.document);
+    setResolved(true);
+    setLoading(false);
+    if (!docHref(data.document)) setShowNotice(true);
+  }
+
+  const href = docHref(document);
+  if (resolved && href) {
+    return (
+      <DocumentPreviewLink
+        href={href}
+        fileName={document?.file_name}
+        externalUrl={document?.external_url}
+        className={className}
+        autoOpen
+      >
+        {label}
+      </DocumentPreviewLink>
+    );
+  }
+
+  const note = document?.doc_id
+    ? "This document was uploaded before file storage was set up, so there's no file to preview."
+    : "No document attached.";
+
+  return (
+    <>
+      <button type="button" onClick={handleClick} className={className} disabled={loading}>
         {label}
       </button>
       {showNotice && (

@@ -10,6 +10,7 @@ import {
 import { EditInvoiceButton, DeleteInvoiceButton } from "./InvoiceModal";
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
 import InvoiceChainButton from "./InvoiceChainModal";
+import { ActionsMenu } from "./ActionsMenu";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -127,12 +128,14 @@ export function InvoicesTable({ invoices, statusLabels, canEdit, canDelete }) {
                   )}
                 </td>
                 <td className="px-3 py-3">
-                  <div className="flex gap-2">
-                    {canEdit && <EditInvoiceButton invoice={inv} statusLabels={statusLabels} />}
-                    {canDelete && inv.status !== "Paid" && inv.status !== "Partial Paid" && (
-                      <DeleteInvoiceButton invId={inv.inv_id} />
-                    )}
-                  </div>
+                  {(canEdit || (canDelete && inv.status !== "Paid" && inv.status !== "Partial Paid")) && (
+                    <ActionsMenu>
+                      {canEdit && <EditInvoiceButton invoice={inv} statusLabels={statusLabels} />}
+                      {canDelete && inv.status !== "Paid" && inv.status !== "Partial Paid" && (
+                        <DeleteInvoiceButton invId={inv.inv_id} />
+                      )}
+                    </ActionsMenu>
+                  )}
                 </td>
               </tr>
             ))}

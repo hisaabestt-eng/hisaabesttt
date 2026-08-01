@@ -8,6 +8,7 @@ import { EditPOButton, DeletePOButton } from "./POModal";
 import { EntityDocLink } from "./DocumentPreview";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 import { EstimateTagsEditor } from "./EstimateTagsEditor";
+import { ActionsMenu } from "./ActionsMenu";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -95,10 +96,12 @@ export function EstimateSummaryRow({
           </span>
         </td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-          <div className="flex gap-2">
-            {canEdit && <EditEstimateButton estimate={est} statusLabels={statusLabels} />}
-            {canDelete && !est.po_id && <DeleteEstimateButton estId={est.est_id} />}
-          </div>
+          {(canEdit || (canDelete && !est.po_id)) && (
+            <ActionsMenu>
+              {canEdit && <EditEstimateButton estimate={est} statusLabels={statusLabels} />}
+              {canDelete && !est.po_id && <DeleteEstimateButton estId={est.est_id} />}
+            </ActionsMenu>
+          )}
         </td>
       </tr>
       {open && (
