@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { progressLabel, progressStyle } from "@/lib/status";
 import { DateField } from "./DateField";
+import InvoiceChainButton from "./InvoiceChainModal";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -184,7 +185,9 @@ export function InvoiceSummaryRow({
             />
           )}
           <span className="mr-1.5 inline-block w-3 text-gray-400">{open ? "▾" : "▸"}</span>
-          {invoice.invoice_no}
+          <span onClick={(e) => e.stopPropagation()}>
+            <InvoiceChainButton invoiceNo={invoice.invoice_no} />
+          </span>
         </td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(invoice.invoice_total)}</td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(invoice.total_received)}</td>

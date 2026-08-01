@@ -1,6 +1,7 @@
 "use client";
 
 import { LIFECYCLE_STYLES, progressLabel, progressStyle } from "@/lib/status";
+import InvoiceChainButton from "./InvoiceChainModal";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -45,7 +46,9 @@ export function InvoiceBreakdownTable({ invoices, emptyMessage, pendingAmount = 
       <tbody className="divide-y divide-gray-100">
         {invoices.map((inv) => (
           <tr key={inv.inv_id}>
-            <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{inv.invoice_no}</td>
+            <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
+              <InvoiceChainButton invoiceNo={inv.invoice_no} />
+            </td>
             <td className="px-3 py-2 text-gray-700 dark:text-gray-300">{formatDate(inv.invoice_date)}</td>
             <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
               {formatMoney(inv.invoice_amount)}

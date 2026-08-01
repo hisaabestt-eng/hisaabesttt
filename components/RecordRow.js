@@ -9,6 +9,7 @@ import { EditEstimateButton, DeleteEstimateButton } from "./EstimateModal";
 import { EditPOButton, DeletePOButton } from "./POModal";
 import { InvoiceBreakdownTable } from "./InvoiceBreakdownTable";
 import { EstimateTagsEditor } from "./EstimateTagsEditor";
+import { EntityDocLink } from "./DocumentPreview";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -115,7 +116,18 @@ export function RecordRow({
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3 px-3 py-2.5 sm:grid-cols-4">
-                    <Field label="Estimate No" value={estimate.est_no} />
+                    <div>
+                      <div className="text-xs font-medium uppercase tracking-wide text-gray-400">Estimate No</div>
+                      <EntityDocLink
+                        label={estimate.est_no}
+                        externalUrl={estimate.external_url}
+                        docId={estimate.doc_id}
+                        docFileExists={estimate.docFileExists}
+                        fileName={estimate.file_name}
+                        href={`/uploads/estimates/${estimate.est_id}-${estimate.file_name}`}
+                        className="text-sm text-gray-700 underline decoration-dotted hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                      />
+                    </div>
                     <Field label="Estimate Date" value={formatDate(estimate.estimate_date)} />
                     <Field label="Amount" value={formatMoney(estimate.amount)} />
                   </div>
@@ -136,7 +148,18 @@ export function RecordRow({
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3 px-3 py-2.5 sm:grid-cols-4">
-                        <Field label="PO No" value={po.po_no} />
+                        <div>
+                          <div className="text-xs font-medium uppercase tracking-wide text-gray-400">PO No</div>
+                          <EntityDocLink
+                            label={po.po_no}
+                            externalUrl={po.external_url}
+                            docId={po.doc_id}
+                            docFileExists={po.docFileExists}
+                            fileName={po.file_name}
+                            href={`/uploads/purchase-order/${po.po_id}-${po.file_name}`}
+                            className="text-sm text-gray-700 underline decoration-dotted hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                          />
+                        </div>
                         <Field label="PO Date" value={formatDate(po.po_date)} />
                         <Field label="Amount" value={formatMoney(po.amount)} />
                         <Field label="Balance to Invoice" value={formatMoney(po.invoice_balance)} />

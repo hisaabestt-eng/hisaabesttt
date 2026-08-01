@@ -106,7 +106,19 @@ export function POSummaryRow({
                 </div>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Estimate No</div>
-                  <div className="text-sm text-gray-700 dark:text-gray-300">{po.est_no || "—"}</div>
+                  {po.est_no ? (
+                    <EntityDocLink
+                      label={po.est_no}
+                      externalUrl={po.estimate_external_url}
+                      docId={po.estimate_doc_id}
+                      docFileExists={po.estimateDocFileExists}
+                      fileName={po.estimate_file_name}
+                      href={`/uploads/estimates/${po.est_id}-${po.estimate_file_name}`}
+                      className="text-sm text-gray-700 underline decoration-dotted hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                    />
+                  ) : (
+                    <div className="text-sm text-gray-700 dark:text-gray-300">—</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Estimate Description</div>

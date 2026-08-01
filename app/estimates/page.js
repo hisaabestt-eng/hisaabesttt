@@ -38,6 +38,11 @@ function documentFileExists(estId, fileName) {
   );
 }
 
+function poDocumentFileExists(poId, fileName) {
+  if (!fileName) return false;
+  return existsSync(path.join(process.cwd(), "public", "uploads", "purchase-order", `${poId}-${fileName}`));
+}
+
 const TAB_KEYS = ["estimates", "records"];
 
 export default async function EstimatesPage({ searchParams }) {
@@ -108,6 +113,14 @@ export default async function EstimatesPage({ searchParams }) {
     ...est,
     docFileExists: est.doc_id ? documentFileExists(est.est_id, est.file_name) : false,
   }));
+  const allEstimatesWithDocFlag = allEstimates.map((est) => ({
+    ...est,
+    docFileExists: est.doc_id ? documentFileExists(est.est_id, est.file_name) : false,
+  }));
+  const allPOsWithDocFlag = allPOs.map((po) => ({
+    ...po,
+    docFileExists: po.doc_id ? poDocumentFileExists(po.po_id, po.file_name) : false,
+  }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -158,8 +171,8 @@ export default async function EstimatesPage({ searchParams }) {
       {tab === "records" ? (
         <RecordsTable
           records={records}
-          allEstimates={allEstimates}
-          allPOs={allPOs}
+          allEstimates={allEstimatesWithDocFlag}
+          allPOs={allPOsWithDocFlag}
           allInvoices={allInvoices}
           statusLabels={recordStatusLabels}
           estimateStatusLabels={estimateStatusLabels}
@@ -172,7 +185,7 @@ export default async function EstimatesPage({ searchParams }) {
       ) : (
         <EstimatesTable
           estimates={estimatesWithDocFlag}
-          allPOs={allPOs}
+          allPOs={allPOsWithDocFlag}
           allInvoices={allInvoices}
           statusLabels={estimateStatusLabels}
           poStatusLabels={poStatusLabels}

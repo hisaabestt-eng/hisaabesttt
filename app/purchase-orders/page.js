@@ -30,6 +30,11 @@ function documentFileExists(poId, fileName) {
   );
 }
 
+function estimateDocumentFileExists(estId, fileName) {
+  if (!fileName) return false;
+  return existsSync(path.join(process.cwd(), "public", "uploads", "estimates", `${estId}-${fileName}`));
+}
+
 export default async function PurchaseOrdersPage({ searchParams }) {
   const params = await searchParams;
   const search = params?.search || "";
@@ -73,6 +78,9 @@ export default async function PurchaseOrdersPage({ searchParams }) {
   const posWithDocFlag = purchaseOrders.map((po) => ({
     ...po,
     docFileExists: po.doc_id ? documentFileExists(po.po_id, po.file_name) : false,
+    estimateDocFileExists: po.estimate_doc_id
+      ? estimateDocumentFileExists(po.est_id, po.estimate_file_name)
+      : false,
   }));
 
   return (

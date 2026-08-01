@@ -2,6 +2,7 @@
 
 import { LIFECYCLE_STYLES, progressLabel, progressStyle, invoiceDisplayStatus } from "@/lib/status";
 import { useRefineFilter, RefineToggleButton } from "./useRefineFilter";
+import InvoiceChainButton from "./InvoiceChainModal";
 
 function formatMoney(value) {
   if (value === null || value === undefined) return "—";
@@ -109,7 +110,9 @@ export function DetailedInvoicesTable({ invoices, clientId }) {
                     )}
                     {inv.record_id}
                   </td>
-                  <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{inv.invoice_no}</td>
+                  <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+                    <InvoiceChainButton invoiceNo={inv.invoice_no} />
+                  </td>
                   <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatDate(inv.invoice_date)}</td>
                   <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{inv.client_name}</td>
                   <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{inv.description}</td>

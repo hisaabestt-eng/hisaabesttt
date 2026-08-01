@@ -17,33 +17,27 @@ function docHref(document) {
   return document.external_url || document.publicPath || null;
 }
 
-function Field({ label, value }) {
+// The number itself (Estimate No / PO Number / Invoice No) is the link when
+// a document exists for that entity — mirrors RecordDetailModal's Field.
+function Field({ label, value, doc }) {
+  const href = doc !== undefined ? docHref(doc) : null;
   return (
     <div>
       <div className="text-xs font-medium uppercase tracking-wide text-gray-400">{label}</div>
-      <div className="text-sm text-gray-800 dark:text-gray-200">{value}</div>
-    </div>
-  );
-}
-
-function DocumentField({ document }) {
-  const href = docHref(document);
-  return (
-    <div>
-      <div className="text-xs font-medium uppercase tracking-wide text-gray-400">Document</div>
       {href ? (
         <DocumentPreviewLink
           href={href}
-          fileName={document?.file_name}
-          externalUrl={document?.external_url}
+          fileName={doc?.file_name}
+          externalUrl={doc?.external_url}
           className="text-sm text-blue-600 underline"
         >
-          {document.external_url ? "External Link" : document.file_name}
+          {value}
         </DocumentPreviewLink>
       ) : (
-        <div className="text-sm text-gray-400">
-          {document?.doc_id ? "Uploaded before file storage was set up — no file to preview." : "No document attached."}
-        </div>
+        <div className="text-sm text-gray-800 dark:text-gray-200">{value}</div>
+      )}
+      {doc !== undefined && !href && (
+        <div className="text-xs text-gray-400">No document attached</div>
       )}
     </div>
   );
@@ -99,7 +93,11 @@ export default function InvoiceChainButton({ invoiceNo }) {
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-2 gap-3 border-b pb-3">
                   <Field label="Estimate Date" value={formatDate(detail.estimateDate)} />
-                  <Field label="Estimate No" value={detail.estimateNo || "—"} />
+                  <Field
+                    label="Estimate No"
+                    value={detail.estimateNo || "—"}
+                    doc={detail.estimateNo ? detail.estimateDocument : undefined}
+                  />
                 </div>
 
                 <div className="border-b pb-3">
@@ -108,15 +106,17 @@ export default function InvoiceChainButton({ invoiceNo }) {
 
                 <div className="grid grid-cols-2 gap-3 border-b pb-3">
                   <Field label="PO Date" value={formatDate(detail.poDate)} />
-                  <Field label="PO Number" value={detail.poNo || "—"} />
+                  <Field
+                    label="PO Number"
+                    value={detail.poNo || "—"}
+                    doc={detail.poNo ? detail.poDocument : undefined}
+                  />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 border-b pb-3">
+                <div className="grid grid-cols-2 gap-3">
                   <Field label="Invoice Date" value={formatDate(detail.invoiceDate)} />
-                  <Field label="Invoice No" value={detail.invoiceNo || "—"} />
+                  <Field label="Invoice No" value={detail.invoiceNo || "—"} doc={detail.invoiceDocument} />
                 </div>
-
-                <DocumentField document={detail.document} />
               </div>
             )}
 
