@@ -7,19 +7,29 @@ function driveIdFromUrl(url) {
   return m ? m[1] : null;
 }
 
+function sheetsIdFromUrl(url) {
+  const m = url.match(/\/spreadsheets\/d\/([^/]+)/);
+  return m ? m[1] : null;
+}
+
 function getExt(fileName) {
   return (fileName || "").split(".").pop()?.toLowerCase() || "";
 }
 
 // Decides how a document can be shown inline instead of just opening a new
-// tab. Drive links use Drive's own preview iframe (handles PDF/image/Excel
-// alike); local uploads are previewed by extension — Excel needs client-side
-// parsing since browsers can't render spreadsheets natively.
+// tab. Drive file links and Google Sheets links each use Google's own
+// preview iframe for that surface; local uploads are previewed by
+// extension — Excel needs client-side parsing since browsers can't render
+// spreadsheets natively.
 function previewKind({ externalUrl, fileName }) {
   if (externalUrl) {
     const driveId = driveIdFromUrl(externalUrl);
     if (driveId) {
       return { kind: "iframe", src: `https://drive.google.com/file/d/${driveId}/preview` };
+    }
+    const sheetsId = sheetsIdFromUrl(externalUrl);
+    if (sheetsId) {
+      return { kind: "iframe", src: `https://docs.google.com/spreadsheets/d/${sheetsId}/preview` };
     }
     return { kind: "none" };
   }
