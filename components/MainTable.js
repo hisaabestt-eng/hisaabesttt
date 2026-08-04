@@ -242,7 +242,7 @@ export function MainTable({ rows, totalCount, search, progress, progressOptions 
 
       <div
         ref={tableWrapperRef}
-        className="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700"
+        className="max-h-[70vh] overflow-y-auto overflow-x-auto overscroll-contain rounded-lg border border-gray-100 dark:border-gray-700"
       >
         <table className="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
           <thead className="sticky top-0 bg-gray-50 dark:bg-gray-900/40">

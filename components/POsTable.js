@@ -46,7 +46,7 @@ export function POsTable({ purchaseOrders, statusLabels, canEdit, canDelete, sea
         />
       </div>
 
-      <div className="max-h-[70vh] overflow-y-auto overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-700">
+      <div className="max-h-[70vh] overflow-y-auto overflow-x-auto overscroll-contain rounded-lg border border-gray-100 dark:border-gray-700">
         <table className="min-w-full divide-y divide-gray-100 text-sm dark:divide-gray-700">
           <thead className="sticky top-0 bg-gray-50 dark:bg-gray-900/40">
             <tr>
