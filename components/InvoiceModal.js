@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { DocumentField, EMPTY_DOC, uploadDocumentField } from "./DocumentField";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { DateField } from "./DateField";
@@ -153,6 +154,7 @@ function AmountFields({
 
 export function AddInvoiceButton({ pos, estimates = [], compId }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   // Some clients skip PO and want an invoice straight off the Estimate —
   // "source" picks which picker (Purchase Order or Estimate) is in play.
   const [source, setSource] = useState(pos.length > 0 ? "po" : "estimate");
@@ -484,6 +486,7 @@ export function AddInvoiceButton({ pos, estimates = [], compId }) {
 
 export function EditInvoiceButton({ invoice, statusLabels = [] }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [invoiceNo, setInvoiceNo] = useState(invoice.invoice_no);
   const [invoiceDate, setInvoiceDate] = useState(toDateInputValue(invoice.invoice_date));
   const [description, setDescription] = useState(invoice.description);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 
 const TEMPLATE_HEADERS = [
@@ -41,6 +42,7 @@ function toDateOnlyString(value) {
 // one bad row rejects the whole upload, same rule as the Records-only upload.
 export function BulkChainUploadButton({ compId }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState([]);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { DocumentPreviewLink } from "./DocumentPreview";
 
 function formatDate(value) {
@@ -45,6 +46,7 @@ function Field({ label, value, doc }) {
 
 export default function InvoiceChainButton({ invoiceNo }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
 

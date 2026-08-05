@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 
 export function AddUserButton() {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -204,6 +206,7 @@ export function UserRoleSelect({ userId, role, isSelf }) {
 
 export function ChangePasswordButton({ userId }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");

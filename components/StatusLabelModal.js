@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter, usePathname } from "next/navigation";
 
 const ENTITY_TYPE_OPTIONS = [
@@ -37,6 +38,7 @@ export function EntityTypeSelect({ entityType }) {
 
 export function AddStatusLabelButton({ entityType }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [labelName, setLabelName] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");

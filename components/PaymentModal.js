@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 import { DateField } from "./DateField";
 
@@ -110,6 +111,7 @@ function AllocationRow({ row, invoices, usedInvoiceNos, maxAmount, remainingPaym
 // that's a separate step (AllocatePaymentButton) once the payment exists.
 export function AddPaymentButton({ compId, clientId }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [paymentDate, setPaymentDate] = useState("");
   const [amountReceived, setAmountReceived] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -236,6 +238,7 @@ function firstRow(outstandingInvoices, paymentBalance) {
 
 export function AllocatePaymentButton({ payment, outstandingInvoices }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [allocationDate, setAllocationDate] = useState(toDateInputValue(payment.payment_date));
   const [rows, setRows] = useState([firstRow(outstandingInvoices, payment.balance)]);
   const [saving, setSaving] = useState(false);
@@ -414,6 +417,7 @@ export function AllocatePaymentButton({ payment, outstandingInvoices }) {
 
 export function EditPaymentButton({ payment }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [paymentDate, setPaymentDate] = useState(toDateInputValue(payment.payment_date));
   const [amountReceived, setAmountReceived] = useState(String(payment.amount_received));
   const [remarks, setRemarks] = useState(payment.remarks || "");

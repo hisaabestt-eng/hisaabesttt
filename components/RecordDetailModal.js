@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 import { STATUS_STYLES, LIFECYCLE_STYLES } from "@/lib/status";
 import { parseTags } from "@/lib/tags";
@@ -48,6 +49,7 @@ function Field({ label, value, doc }) {
 
 export default function RecordDetailButton({ recordId, description }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [loading, setLoading] = useState(false);
   const [detail, setDetail] = useState(null);
   const [tagInput, setTagInput] = useState("");

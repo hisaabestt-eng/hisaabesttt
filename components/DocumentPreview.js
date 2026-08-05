@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 function driveIdFromUrl(url) {
   const m = url.match(/\/file\/d\/([^/]+)/);
@@ -58,6 +59,7 @@ const ZOOM_STEP = 0.1;
 // open in a new tab via the normal <a> behavior.
 export function DocumentPreviewLink({ href, fileName, externalUrl, children, className, autoOpen = false }) {
   const [open, setOpen] = useState(autoOpen);
+  useBodyScrollLock(open);
   const [tableHtml, setTableHtml] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -224,6 +226,7 @@ export function DocumentPreviewLink({ href, fileName, externalUrl, children, cla
 // notice instead of doing nothing, so the click always gives feedback.
 export function EntityDocLink({ label, externalUrl, docId, docFileExists, fileName, href, className }) {
   const [showNotice, setShowNotice] = useState(false);
+  useBodyScrollLock(showNotice);
 
   if (externalUrl) {
     return (
@@ -289,6 +292,7 @@ export function LazyEntityDocLink({ label, fetchUrl, className }) {
   const [loading, setLoading] = useState(false);
   const [document, setDocument] = useState(null);
   const [showNotice, setShowNotice] = useState(false);
+  useBodyScrollLock(showNotice);
 
   async function handleClick(e) {
     e.stopPropagation();

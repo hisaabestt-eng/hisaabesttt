@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter, usePathname } from "next/navigation";
 import { DateField } from "./DateField";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -32,6 +33,7 @@ function toDateOnlyString(value) {
 // existing "Estimate Pending" record that has no estimate yet.
 export function AddRecordButton({ compId, clients, suggestedEstNosByClient = {} }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [clientList, setClientList] = useState(clients);
   const [clientId, setClientId] = useState(clients[0]?.client_id || "");
   const [newClientName, setNewClientName] = useState("");
@@ -365,6 +367,7 @@ function toExcelDateCell(value) {
 // back at once so it can all be fixed in one pass instead of trial-and-error.
 export function BulkUploadRecordsButton({ compId }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState([]);
@@ -520,6 +523,7 @@ export function BulkUploadRecordsButton({ compId }) {
 
 export function EditRecordButton({ record, statusLabels = [] }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [recordDate, setRecordDate] = useState(toDateInputValue(record.record_date));
   const [description, setDescription] = useState(record.description);
   const [amount, setAmount] = useState(record.amount);

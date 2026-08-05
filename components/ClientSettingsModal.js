@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 
 export function AddClientButton({ compId }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [clientName, setClientName] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -90,6 +92,7 @@ export function AddClientButton({ compId }) {
 
 export function EditClientButton({ clientId, clientName }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [name, setName] = useState(clientName);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");

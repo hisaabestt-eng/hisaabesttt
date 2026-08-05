@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 import { DocumentField, EMPTY_DOC, uploadDocumentField } from "./DocumentField";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -23,6 +24,7 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEst
   }
 
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [recordId, setRecordId] = useState(recordsWithoutEstimate[0]?.record_id || "");
   const [estNo, setEstNo] = useState(suggestionFor(recordsWithoutEstimate[0]?.record_id));
   const [estDate, setEstDate] = useState("");
@@ -239,6 +241,7 @@ export function AddEstimateButton({ recordsWithoutEstimate, compId, suggestedEst
 
 export function EditEstimateButton({ estimate, statusLabels = [] }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [estNo, setEstNo] = useState(estimate.est_no);
   const [estDate, setEstDate] = useState(toDateInputValue(estimate.estimate_date));
   const [description, setDescription] = useState(estimate.description);

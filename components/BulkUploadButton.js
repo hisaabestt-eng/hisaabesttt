@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 
 // Excel date cells parse into JS Date objects (cellDates: true) — left as-is,
@@ -32,6 +33,7 @@ export function BulkUploadButton({
   entityLabel = "row",
 }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState([]);

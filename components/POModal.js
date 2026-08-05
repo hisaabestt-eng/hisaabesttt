@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { useRouter } from "next/navigation";
 import { DocumentField, EMPTY_DOC, uploadDocumentField } from "./DocumentField";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -16,6 +17,7 @@ function toDateInputValue(value) {
 
 export function AddPOButton({ estimatesWithoutPO, compId }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [estId, setEstId] = useState(estimatesWithoutPO[0]?.est_id || "");
   const [poNo, setPoNo] = useState("");
   const [poDate, setPoDate] = useState("");
@@ -228,6 +230,7 @@ export function AddPOButton({ estimatesWithoutPO, compId }) {
 
 export function EditPOButton({ po, statusLabels = [] }) {
   const [open, setOpen] = useState(false);
+  useBodyScrollLock(open);
   const [poNo, setPoNo] = useState(po.po_no);
   const [poDate, setPoDate] = useState(toDateInputValue(po.po_date));
   const [description, setDescription] = useState(po.description);
