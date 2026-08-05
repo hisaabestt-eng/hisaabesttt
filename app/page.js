@@ -41,7 +41,7 @@ export default async function Home({ searchParams }) {
   const overview = await getRecordsOverview({ compId, clientId, search, progress, year, yearType, from, to, enteredOn });
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Main Page</h1>
         <CompanySelect companies={companies} compId={compId} />

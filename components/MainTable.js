@@ -81,6 +81,10 @@ export function MainTable({ rows, totalCount, search, progress, progressOptions 
         "Record ID": row.record_id,
         Date: formatDate(row.estimate_date),
         Description: row.estimate_description,
+        "PO No": row.po_no || "",
+        "PO Date": row.po_no ? formatDate(row.po_date) : "",
+        "Invoice No": (row.invoices || []).map((inv) => inv.invoice_no).join(", "),
+        "Invoice Date": (row.invoices || []).map((inv) => formatDate(inv.invoice_date)).join(", "),
         Amount: mainRowAmount(row),
         Status: rowStatusText(row),
       }));
@@ -253,6 +257,12 @@ export function MainTable({ rows, totalCount, search, progress, progressOptions 
               <th className="min-w-[320px] px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
                 Description
               </th>
+              <th className="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
+                PO Details
+              </th>
+              <th className="whitespace-nowrap px-3 py-3 text-left font-medium text-gray-600 dark:text-gray-400">
+                Invoice Details
+              </th>
               <th className="px-3 py-3 text-right font-medium text-gray-600 dark:text-gray-400">Amount</th>
               <th className="w-40 px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-400">Status</th>
             </tr>
@@ -269,7 +279,7 @@ export function MainTable({ rows, totalCount, search, progress, progressOptions 
             ))}
             {displayNarrowedRows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={6} className="px-3 py-6 text-center text-gray-500 dark:text-gray-400">
                   {rows.length === 0 ? "No records found." : "All rows refined out — click Refine list to adjust."}
                 </td>
               </tr>
@@ -281,6 +291,7 @@ export function MainTable({ rows, totalCount, search, progress, progressOptions 
                 <td colSpan={2} className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">
                   Total
                 </td>
+                <td colSpan={2}></td>
                 <td className="px-3 py-3 text-right text-gray-900 dark:text-gray-100">{formatMoney(totalAmount)}</td>
                 <td></td>
               </tr>

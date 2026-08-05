@@ -80,6 +80,28 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
         <td className="px-3 py-3 text-gray-700 dark:text-gray-300" onClick={(e) => e.stopPropagation()}>
           <RecordDetailButton recordId={row.record_id} description={row.estimate_description} />
         </td>
+        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+          {row.po_no ? (
+            <>
+              <div>{row.po_no}</div>
+              <div className="text-xs text-gray-400">{formatDate(row.po_date)}</div>
+            </>
+          ) : (
+            "—"
+          )}
+        </td>
+        <td className="px-3 py-3 text-gray-700 dark:text-gray-300">
+          {invoices.length === 0 ? (
+            "—"
+          ) : (
+            invoices.map((inv) => (
+              <div key={inv.inv_id} className={invoices.length > 1 ? "mb-1 last:mb-0" : undefined}>
+                <div>{inv.invoice_no}</div>
+                <div className="text-xs text-gray-400">{formatDate(inv.invoice_date)}</div>
+              </div>
+            ))
+          )}
+        </td>
         <td className="px-3 py-3 text-right text-gray-700 dark:text-gray-300">{formatMoney(mainRowAmount(row))}</td>
         <td className="px-3 py-3 text-center">
           {invoices.length > 1 ? (
@@ -114,7 +136,7 @@ export function RecordSummaryRow({ row, refining = false, checked = true, onTogg
       </tr>
       {open && expandable && (
         <tr>
-          <td colSpan={4} className="bg-gray-50 p-3 dark:bg-gray-900/40">
+          <td colSpan={6} className="bg-gray-50 p-3 dark:bg-gray-900/40">
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <div className="border-b border-gray-100 bg-gray-50/60 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:border-gray-700 dark:bg-gray-900/40">
                 Invoices for {row.estimate_description}
