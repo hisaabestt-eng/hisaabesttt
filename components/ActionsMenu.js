@@ -82,12 +82,19 @@ export function ActionsMenu({ children }) {
               // No `opacity` here on purpose — unlike overflow/max-height,
               // opacity composites the whole subtree (including a
               // position:fixed descendant), so it would dim/hide a child's
-              // full-screen modal right along with this dropdown.
+              // full-screen modal right along with this dropdown. Same
+              // reasoning rules out `pointer-events: none` too — it's
+              // inherited by descendants regardless of their own position
+              // scheme, so it silently made a child's now-open fixed modal
+              // completely unclickable (mouse events passed straight
+              // through to whatever was underneath) the instant this
+              // wrapper collapsed. max-height: 0 alone already makes the
+              // collapsed trigger buttons unclickable — they have no area
+              // left to hit-test against — so no extra property is needed.
               position: "fixed",
               top: coords.top,
               right: coords.right,
               maxHeight: open ? "320px" : 0,
-              pointerEvents: open ? "auto" : "none",
               overflow: "hidden",
             }}
             className={`z-50 flex min-w-[110px] flex-col gap-0.5 rounded-md bg-white dark:bg-gray-800 [&_button]:w-full [&_button]:px-3 [&_button]:py-1 [&_button]:text-left [&_button]:text-xs [&_button]:no-underline [&_button]:hover:bg-gray-50 dark:[&_button]:hover:bg-gray-700 ${
