@@ -520,6 +520,13 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
   const [error, setError] = useState("");
   const router = useRouter();
   const isCancelled = invoice.lifecycle === "Cancelled";
+  // A dead invoice (Cancelled/Rejected/Archived) doesn't consume real PO
+  // budget — the "already invoiced by other invoices" figure for its
+  // siblings can easily leave zero balance for it specifically, which
+  // isn't a real problem since it was never going to be paid. Without this
+  // exemption, the balance check alone disabled Save for the whole form —
+  // including unrelated edits like attaching a reference document.
+  const isDeadEnd = ["Cancelled", "Rejected", "Archived"].includes(invoice.lifecycle);
   // Once real money has been allocated (Paid/Partial Paid), the amount
   // locks — Raised Not Submitted Yet, In Progress, and Scheduled are all
   // still "nothing received yet" states, so the amount stays editable through them.
@@ -529,7 +536,7 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
   const parentAmount = invoice.po_no ? invoice.po_amount : invoice.est_amount;
   const parentInvoicedOthers = invoice.po_no ? invoice.po_invoiced_others : invoice.est_invoiced_others;
   const balanceAvailable = Number(parentAmount) - Number(parentInvoicedOthers || 0);
-  const exceedsPOBalance = !amountLocked && Number(invoiceAmount) > balanceAvailable + 0.01;
+  const exceedsPOBalance = !amountLocked && !isDeadEnd && Number(invoiceAmount) > balanceAvailable + 0.01;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -677,8 +684,8 @@ export function EditInvoiceButton({ invoice, statusLabels = [] }) {
                 tdsPct={tdsPct}
                 setTdsPct={setTdsPct}
                 disabled={amountLocked}
-                poAmount={amountLocked ? undefined : parentAmount}
-                poInvoicedOthers={amountLocked ? undefined : parentInvoicedOthers}
+                poAmount={amountLocked || isDeadEnd ? undefined : parentAmount}
+                poInvoicedOthers={amountLocked || isDeadEnd ? undefined : parentInvoicedOthers}
                 parentLabel={invoice.po_no ? "PO" : "Estimate"}
               />
 
